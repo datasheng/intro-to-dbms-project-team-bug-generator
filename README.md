@@ -1,1 +1,1 @@
-# csc-336-project
+# chalkboard-csc336
