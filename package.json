@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "argon2": "^0.40.3",
-    "jsonwebtoken": "^9.0.2"
-  }
-}
