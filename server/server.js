@@ -1,11 +1,14 @@
 const express = require("express");
 const db = require("./db/config/db.config");
 const createTableQueries = require("./db/models/createTables");
+const authRoutes = require("./routes/auth");
+const verifyToken = require("./middlewares/auth");
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use("/auth", authRoutes);
 
 const createTables = async () => {
   for (const { name, query } of createTableQueries) {

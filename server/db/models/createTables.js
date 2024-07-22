@@ -6,7 +6,7 @@ const queries = [
                 user_id CHAR(36) PRIMARY KEY,
                 username VARCHAR(64),
                 email VARCHAR(255),
-                password VARCHAR(64)
+                password VARCHAR(255)
             )
         `,
   },
