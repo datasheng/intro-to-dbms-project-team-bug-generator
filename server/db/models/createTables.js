@@ -4,7 +4,7 @@ const queries = [
     query: `
             CREATE TABLE IF NOT EXISTS User (
                 user_id CHAR(36) PRIMARY KEY,
-                username VARCHAR(64),
+                full_name VARCHAR(255),
                 email VARCHAR(255),
                 password VARCHAR(255)
             )

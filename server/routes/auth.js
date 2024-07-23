@@ -8,9 +8,9 @@ const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { fullName, email, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!fullName || !email || !password) {
     return res.status(400).send("All fields are required");
   }
 
@@ -33,8 +33,8 @@ router.post("/register", async (req, res) => {
         });
 
         db.query(
-          "INSERT INTO User (user_id, username, email, password) VALUES (UUID(), ?, ?, ?)",
-          [username, email, hashedPassword],
+          "INSERT INTO User (user_id, full_name, email, password) VALUES (UUID(), ?, ?, ?)",
+          [fullName, email, hashedPassword],
           (err, results) => {
             if (err) {
               console.error("Error inserting user:", err);
