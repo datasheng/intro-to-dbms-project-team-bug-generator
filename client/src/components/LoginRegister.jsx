@@ -36,7 +36,7 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
 
     try {
       if (isLogin) {
-        const response = await fetch("/auth/login", {
+        const response = await fetch("http://localhost:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -49,14 +49,14 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || "Registration failed");
+          throw new Error(errorData.message || "Login failed");
         }
 
         const data = await response.json();
-        console.log("Registration successful:", data);
+        console.log("Login successful:", data);
         // Handle successful login
       } else {
-        const response = await fetch("/auth/register", {
+        const response = await fetch("http://localhost:3000/auth/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
