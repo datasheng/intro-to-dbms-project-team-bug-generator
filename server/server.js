@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const db = require("./db/config/db.config");
 const createTableQueries = require("./db/models/createTables");
 const authRoutes = require("./routes/auth");
@@ -8,6 +9,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use(cors());
 app.use("/auth", authRoutes);
 
 const createTables = async () => {
