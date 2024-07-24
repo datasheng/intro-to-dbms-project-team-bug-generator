@@ -37,6 +37,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import CourseExplorer from "./components/CourseExplorer";
 
 const Navbar = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -192,7 +193,7 @@ const HomePage = () => (
             size="lg"
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
-            Sign Up
+            Register
           </Button>
         </Link>
         <Link to="/signin">
@@ -201,7 +202,7 @@ const HomePage = () => (
             variant="outline"
             className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
           >
-            Log In
+            Sign In
           </Button>
         </Link>
       </div>
@@ -260,6 +261,7 @@ const AppContent = () => {
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/courses" element={<CourseExplorer />} />
         <Route
           path="/signin"
           element={
