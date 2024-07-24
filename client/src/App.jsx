@@ -125,19 +125,19 @@ const Feature = ({ icon, title, description }) => (
   </Card>
 );
 
-const HomePage = () => (
+const HomePage = ({ user }) => (
   <div className="container mx-auto px-4">
     <section className="text-center py-20">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
         Welcome to Chalkboard
       </h1>
       <p className="text-xl mb-8">Your Digital Course Inventory Platform</p>
-      <Link to="/courses">
+      <Link to={user ? "/dashboard" : "/courses"}>
         <Button
           size="lg"
           className="bg-indigo-600 hover:bg-indigo-700 text-white"
         >
-          Explore Courses
+          {user ? "Dashboard" : "Explore Courses"}
         </Button>
       </Link>
     </section>
@@ -260,7 +260,7 @@ const AppContent = () => {
     <div className="min-h-screen bg-gray-100">
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage user={user} />} />
         <Route path="/courses" element={<CourseExplorer />} />
         <Route
           path="/signin"
