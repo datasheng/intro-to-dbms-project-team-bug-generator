@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+
 async function verifyToken(req, res, next) {
   const token = req.cookies.auth;
 
@@ -14,6 +16,7 @@ async function verifyToken(req, res, next) {
     }
 
     req.userId = decoded.id;
+    req.userFullName = decoded.name;
     next();
   });
 }

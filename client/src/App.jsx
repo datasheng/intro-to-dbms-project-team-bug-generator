@@ -1,11 +1,18 @@
-import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
-import { BookOpen, Users, Award } from "lucide-react";
-// Import the LoginRegister component we created earlier
+import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
+import { BookOpen, Users, Award, User, LogOut } from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
 import StudentDashboard from "./components/StudentDashboard";
+import { Button } from "@/components/ui/button";
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
   return (
     <nav className="bg-white shadow-lg">
       <div className="max-w-6xl mx-auto px-4">
@@ -19,8 +26,19 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          <div className="hidden md:flex items-center space-x-3 ">
-            {
+          <div className="hidden md:flex items-center space-x-3">
+            {user ? (
+              <>
+                <div className="flex items-center">
+                  <User className="mr-2 h-4 w-4 text-gray-500" />
+                  <span className="font-medium text-gray-500">{user}</span>
+                </div>
+                <Button onClick={onLogout} variant="outline">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
               <>
                 <Link
                   to="/signin"
@@ -35,7 +53,7 @@ const Navbar = () => {
                   Register
                 </Link>
               </>
-            }
+            )}
           </div>
         </div>
       </div>
@@ -89,20 +107,81 @@ const HomePage = () => (
   </div>
 );
 
+const AppContent = () => {
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        if (
+          document.cookie
+            .split(";")
+            .some((item) => item.trim().startsWith("auth="))
+        ) {
+          const response = await fetch("http://localhost:3000/auth/verify", {
+            credentials: "include",
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user.name);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error checking authentication status:", error);
+        setUser(null);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData.fullName);
+    navigate("/dashboard");
+  };
+
+  const handleLogout = async () => {
+    try {
+      document.cookie = "";
+      setUser(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar user={user} onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/signin"
+          element={
+            <LoginRegister isLogin={true} onLoginSuccess={handleLogin} />
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <LoginRegister isLogin={false} onLoginSuccess={handleLogin} />
+          }
+        />
+        <Route path="/selection" element={<SelectionPage user={user} />} />
+        <Route path="/dashboard" element={<StudentDashboard user={user} />} />
+        {/* Add more routes as needed */}
+      </Routes>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signin" element={<LoginRegister isLogin={true} />} />
-          <Route path="/register" element={<LoginRegister isLogin={false} />} />
-          <Route path="/selection" element={<SelectionPage />} />
-          <Route path="/dashboard" element={<StudentDashboard />} />
-          {/* Add more routes as needed */}
-        </Routes>
-      </div>
+      <AppContent />
     </Router>
   );
 };

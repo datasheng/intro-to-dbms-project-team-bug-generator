@@ -99,15 +99,26 @@ router.post("/login", async (req, res) => {
             .send({ success: false, message: "Invalid password" });
         }
 
-        const token = jwt.sign({ id: user.user_id }, SECRET_KEY, {
-          expiresIn: 86400,
-        });
-
+        const token = jwt.sign(
+          { id: user.user_id, name: user.full_name },
+          SECRET_KEY,
+          {
+            expiresIn: 86400,
+          }
+        );
+        // refactor this once frontend is built and served by the same server
+        // since we return a cookie here for further api requests but also
+        // create a cookie on the frontend
         res.cookie("auth", token, {
           httpOnly: true,
           maxAge: 86400 * 1000,
         });
-        res.status(200).send({ success: true, message: "Login successful" });
+        res.status(200).send({
+          success: true,
+          message: "Login successful",
+          auth: token,
+          displayName: user.full_name,
+        });
       } catch (err) {
         console.error("Error verifying password:", err);
         res
@@ -116,6 +127,19 @@ router.post("/login", async (req, res) => {
       }
     }
   );
+});
+
+const verifyToken = require("../middlewares/auth");
+
+router.get("/verify", verifyToken, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Token successfully validated",
+    user: {
+      id: req.userId,
+      name: req.userFullName,
+    },
+  });
 });
 
 module.exports = router;

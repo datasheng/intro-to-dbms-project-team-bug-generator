@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const LoginRegister = ({ isLogin: initialIsLogin }) => {
+const LoginRegister = ({ isLogin: initialIsLogin, onLoginSuccess }) => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(initialIsLogin);
   const [showPassword, setShowPassword] = useState(false);
@@ -56,7 +56,8 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
         }
 
         const data = await response.json();
-        console.log("Login successful:", data);
+        document.cookie = `auth=${data.auth}; path=/; max-age=86400; SameSite=Strict; Secure`;
+        onLoginSuccess({ fullName: data.displayName });
         navigate("/selection");
       } else {
         const response = await fetch("http://localhost:3000/auth/register", {

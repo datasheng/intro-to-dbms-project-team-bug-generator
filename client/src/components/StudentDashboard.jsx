@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Search, BookOpen, User, ChevronLeft } from "lucide-react";
+import { Loader2, Search, BookOpen, ChevronLeft } from "lucide-react";
 
 const API_URL = "http://localhost:3000";
 
@@ -76,28 +68,27 @@ const CourseDetails = ({ course, onBack, onEnroll }) => (
 
 const StudentDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [user, setUser] = useState({
-    fullName: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    role: "Student",
-  });
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [browseCourses, setBrowseCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("browse");
 
   const fetchCourses = async (endpoint) => {
     setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${API_URL}${endpoint}`);
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        credentials: "include", // to include the auth cookie
+      });
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Failed to fetch courses");
       }
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error fetching courses:", error);
+      setError(error.message);
       return [];
     } finally {
       setIsLoading(false);
@@ -118,11 +109,6 @@ const StudentDashboard = () => {
     setSearchTerm("");
   };
 
-  const handleUpdateProfile = (e) => {
-    e.preventDefault();
-    console.log("Updating profile:", user);
-  };
-
   const handleEnroll = async (courseId) => {
     setIsLoading(true);
     try {
@@ -132,16 +118,19 @@ const StudentDashboard = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ courseId }),
+        credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Failed to enroll");
       }
       // Refresh the course lists after successful enrollment
-      fetchCourses("/api/courses").then(setBrowseCourses);
-      fetchCourses("/api/enrollments").then(setMyCourses);
+      await Promise.all([
+        fetchCourses("/browse-courses").then(setBrowseCourses),
+        fetchCourses("/my-courses").then(setMyCourses),
+      ]);
       setSelectedCourse((prev) => ({ ...prev, enrolled: true }));
     } catch (error) {
-      console.error("Error enrolling in course:", error);
+      setError("Error enrolling in course: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -158,27 +147,18 @@ const StudentDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-indigo-700">
-          Student Center
-        </h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" className="flex items-center">
-              <User className="mr-2 h-4 w-4" />
-              {user.fullName}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleUpdateProfile}>
-              {/* Profile edit form fields */}
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-indigo-700 mb-6">
+        Student Dashboard
+      </h1>
+
+      {error && (
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+          role="alert"
+        >
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
 
       {selectedCourse ? (
         <CourseDetails
@@ -187,65 +167,63 @@ const StudentDashboard = () => {
           onEnroll={handleEnroll}
         />
       ) : (
-        <>
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="space-y-4"
-          >
-            <TabsList>
-              <TabsTrigger value="browse">Browse Courses</TabsTrigger>
-              <TabsTrigger value="my-courses">My Courses</TabsTrigger>
-            </TabsList>
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="space-y-4"
+        >
+          <TabsList>
+            <TabsTrigger value="browse">Browse Courses</TabsTrigger>
+            <TabsTrigger value="my-courses">My Courses</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="browse" className="space-y-4">
-              <Input
-                type="text"
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
-              />
-              {isLoading ? (
-                <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+          <TabsContent value="browse" className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Search courses..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredCourses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      onClick={setSelectedCourse}
+                    />
+                  ))}
                 </div>
-              ) : (
-                <ScrollArea className="h-[calc(100vh-200px)]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredCourses.map((course) => (
-                      <CourseCard
-                        key={course.id}
-                        course={course}
-                        onClick={setSelectedCourse}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              )}
-            </TabsContent>
+              </ScrollArea>
+            )}
+          </TabsContent>
 
-            <TabsContent value="my-courses">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+          <TabsContent value="my-courses">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {myCourses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      onClick={setSelectedCourse}
+                    />
+                  ))}
                 </div>
-              ) : (
-                <ScrollArea className="h-[calc(100vh-200px)]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {myCourses.map((course) => (
-                      <CourseCard
-                        key={course.id}
-                        course={course}
-                        onClick={setSelectedCourse}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              )}
-            </TabsContent>
-          </Tabs>
-        </>
+              </ScrollArea>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
