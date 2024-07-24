@@ -11,7 +11,9 @@ router.post("/register", async (req, res) => {
   const { fullName, email, password } = req.body;
 
   if (!fullName || !email || !password) {
-    return res.status(400).send("All fields are required");
+    return res
+      .status(400)
+      .send({ success: false, message: "All fields are required" });
   }
 
   try {
@@ -21,11 +23,15 @@ router.post("/register", async (req, res) => {
       async (err, results) => {
         if (err) {
           console.error("Error querying user:", err);
-          return res.status(500).send("Internal Server Error");
+          return res
+            .status(500)
+            .send({ success: false, message: "Internal Server Error" });
         }
 
         if (results.length > 0) {
-          return res.status(400).send("Email already in use");
+          return res
+            .status(400)
+            .send({ success: false, message: "Email already in use" });
         }
 
         const hashedPassword = await argon2.hash(password, {
@@ -38,16 +44,20 @@ router.post("/register", async (req, res) => {
           (err, results) => {
             if (err) {
               console.error("Error inserting user:", err);
-              return res.status(500).send("Internal Server Error");
+              return res
+                .status(500)
+                .send({ success: false, message: "Internal Server Error" });
             }
-            res.status(201).send("User registered successfully");
+            res
+              .status(201)
+              .send({ success: true, message: "Registration successful" });
           }
         );
       }
     );
   } catch (err) {
     console.error("Error hashing password:", err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send({ success: false, message: "Internal Server Error" });
   }
 });
 
@@ -55,7 +65,9 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send("All fields are required");
+    return res
+      .status(400)
+      .send({ success: false, message: "All fields are required" });
   }
 
   db.query(
@@ -64,11 +76,15 @@ router.post("/login", async (req, res) => {
     async (err, results) => {
       if (err) {
         console.error("Error querying user:", err);
-        return res.status(500).send("Internal Server Error");
+        return res
+          .status(500)
+          .send({ success: false, message: "Internal Server Error" });
       }
 
       if (results.length === 0) {
-        return res.status(404).send("User not found");
+        return res
+          .status(404)
+          .send({ success: false, message: "User not found" });
       }
 
       const user = results[0];
@@ -78,7 +94,9 @@ router.post("/login", async (req, res) => {
         });
 
         if (!passwordIsValid) {
-          return res.status(401).send("Invalid password");
+          return res
+            .status(403)
+            .send({ success: false, message: "Invalid password" });
         }
 
         const token = jwt.sign({ id: user.user_id }, SECRET_KEY, {
@@ -92,7 +110,9 @@ router.post("/login", async (req, res) => {
         res.status(200).send({ success: true, message: "Login successful" });
       } catch (err) {
         console.error("Error verifying password:", err);
-        res.status(500).send("Internal Server Error");
+        res
+          .status(500)
+          .send({ success: false, message: "Internal Server Error" });
       }
     }
   );
