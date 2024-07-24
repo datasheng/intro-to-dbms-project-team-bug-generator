@@ -14,6 +14,7 @@ import {
   LogOut,
   ChevronDown,
   ChevronUp,
+  GraduationCap,
 } from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
@@ -38,7 +39,8 @@ const Navbar = ({ user, onLogout }) => {
           <div className="flex space-x-7">
             <div>
               <Link to="/" className="flex items-center py-4 px-2">
-                <span className="font-semibold text-gray-500 text-lg">
+                <GraduationCap className="h-8 w-8 text-indigo-600 mr-2" />
+                <span className="font-bold text-2xl tracking-tight text-indigo-600">
                   Chalkboard
                 </span>
               </Link>
