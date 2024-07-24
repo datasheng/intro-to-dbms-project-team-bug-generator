@@ -21,15 +21,15 @@ const CourseCard = ({ course, onClick }) => (
     onClick={() => onClick(course)}
   >
     <CardHeader>
-      <CardTitle>{course.title}</CardTitle>
-      <CardDescription>{course.instructor}</CardDescription>
+      <CardTitle>{course.course_name}</CardTitle>
+      <CardDescription>{course.course_id}</CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="line-clamp-2">{course.description}</p>
+      <p className="line-clamp-2">{course.course_description}</p>
     </CardContent>
     <CardFooter>
       <p className="text-sm text-gray-500">
-        Enrolled Students: {course.enrolledStudents}
+        Instructor: {course.instructor_name}
       </p>
     </CardFooter>
   </Card>
@@ -42,25 +42,21 @@ const CourseDetails = ({ course, onBack, onEnroll }) => (
     </Button>
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">{course.title}</CardTitle>
-        <CardDescription>Instructor: {course.instructor}</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          {course.course_name}
+        </CardTitle>
+        <CardDescription>{course.course_id}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="mb-4">{course.description}</p>
+        <p className="mb-4">{course.course_description}</p>
         <p className="text-sm text-gray-500">
-          Enrolled Students: {course.enrolledStudents}
+          Instructor: {course.instructor_name}
         </p>
       </CardContent>
       <CardFooter>
-        {course.enrolled ? (
-          <Button variant="outline" disabled>
-            Already Enrolled
-          </Button>
-        ) : (
-          <Button onClick={() => onEnroll(course.id)}>
-            <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
-          </Button>
-        )}
+        <Button onClick={() => onEnroll(course.course_id)}>
+          <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
+        </Button>
       </CardFooter>
     </Card>
   </div>
@@ -97,9 +93,9 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (activeTab === "browse") {
-      fetchCourses("/browse-courses").then(setBrowseCourses);
+      fetchCourses("/api/courses").then(setBrowseCourses);
     } else if (activeTab === "my-courses") {
-      fetchCourses("/my-courses").then(setMyCourses);
+      fetchCourses("/api/enrollments").then(setMyCourses);
     }
   }, [activeTab]);
 
@@ -125,8 +121,8 @@ const StudentDashboard = () => {
       }
       // Refresh the course lists after successful enrollment
       await Promise.all([
-        fetchCourses("/browse-courses").then(setBrowseCourses),
-        fetchCourses("/my-courses").then(setMyCourses),
+        fetchCourses("/api/courses").then(setBrowseCourses),
+        fetchCourses("/api/enrollments").then(setMyCourses),
       ]);
       setSelectedCourse((prev) => ({ ...prev, enrolled: true }));
     } catch (error) {
@@ -140,8 +136,15 @@ const StudentDashboard = () => {
     activeTab === "browse"
       ? browseCourses.filter(
           (course) =>
-            course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course.instructor.toLowerCase().includes(searchTerm.toLowerCase())
+            course.course_name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            course.instructor_name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            course.course_description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
         )
       : myCourses;
 

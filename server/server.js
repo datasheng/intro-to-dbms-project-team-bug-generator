@@ -5,6 +5,7 @@ const createTableQueries = require("./db/models/createTables");
 const authRoutes = require("./routes/auth");
 const verifyToken = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
+const courseRoutes = require("./routes/courses");
 
 const app = express();
 const PORT = 3000;
@@ -25,6 +26,7 @@ app.use(
 ); // can remove this in final build since frontend and backend will be on the same server
 app.use(cookieParser());
 app.use("/auth", authRoutes);
+app.use("/api", courseRoutes);
 
 const createTables = async () => {
   for (const { name, query } of createTableQueries) {
