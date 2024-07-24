@@ -18,6 +18,7 @@ import {
   DollarSign,
   Globe,
   Clock,
+  ArrowLeftRight,
 } from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
@@ -78,6 +79,12 @@ const Navbar = ({ user, onLogout }) => {
                       <User className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </DropdownMenuItem>
+                    <Link to="/selection">
+                      <DropdownMenuItem>
+                        <ArrowLeftRight className="mr-2 h-4 w-4" />
+                        <span>Switch Role</span>
+                      </DropdownMenuItem>
+                    </Link>
                   </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
