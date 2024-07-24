@@ -1,41 +1,47 @@
 import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import { BookOpen, Users, Award } from "lucide-react";
-
 // Import the LoginRegister component we created earlier
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
+import StudentDashboard from "./components/StudentDashboard";
 
-const Navbar = () => (
-  <nav className="bg-white shadow-lg">
-    <div className="max-w-6xl mx-auto px-4">
-      <div className="flex justify-between">
-        <div className="flex space-x-7">
-          <div>
-            <Link to="/" className="flex items-center py-4 px-2">
-              <span className="font-semibold text-gray-500 text-lg">
-                Chalkboard
-              </span>
-            </Link>
+const Navbar = () => {
+  return (
+    <nav className="bg-white shadow-lg">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex justify-between">
+          <div className="flex space-x-7">
+            <div>
+              <Link to="/" className="flex items-center py-4 px-2">
+                <span className="font-semibold text-gray-500 text-lg">
+                  Chalkboard
+                </span>
+              </Link>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center space-x-3 ">
+            {
+              <>
+                <Link
+                  to="/signin"
+                  className="py-2 px-2 font-medium text-gray-500 rounded hover:bg-indigo-500 hover:text-white transition duration-300"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="py-2 px-2 font-medium text-white bg-indigo-500 rounded hover:bg-indigo-400 transition duration-300"
+                >
+                  Register
+                </Link>
+              </>
+            }
           </div>
         </div>
-        <div className="hidden md:flex items-center space-x-3 ">
-          <Link
-            to="/signin"
-            className="py-2 px-2 font-medium text-gray-500 rounded hover:bg-indigo-500 hover:text-white transition duration-300"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/register"
-            className="py-2 px-2 font-medium text-white bg-indigo-500 rounded hover:bg-indigo-400 transition duration-300"
-          >
-            Register
-          </Link>
-        </div>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 const Feature = ({ icon, title, description }) => (
   <div className="p-6 border rounded-lg shadow-sm">
@@ -93,6 +99,7 @@ const App = () => {
           <Route path="/signin" element={<LoginRegister isLogin={true} />} />
           <Route path="/register" element={<LoginRegister isLogin={false} />} />
           <Route path="/selection" element={<SelectionPage />} />
+          <Route path="/dashboard" element={<StudentDashboard />} />
           {/* Add more routes as needed */}
         </Routes>
       </div>
