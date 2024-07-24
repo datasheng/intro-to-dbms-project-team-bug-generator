@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const LoginRegister = ({ isLogin: initialIsLogin }) => {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(initialIsLogin);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -54,7 +56,8 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
 
         const data = await response.json();
         console.log("Login successful:", data);
-        // Handle successful login
+        // Handle successful login Redirect to /selection
+        navigate('/selection');
       } else {
         const response = await fetch("http://localhost:3000/auth/register", {
           method: "POST",
@@ -76,6 +79,7 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
         const data = await response.json();
         console.log("Registration successful:", data);
         // Handle successful registration
+        navigate('/selection');
       }
     } catch (error) {
       setError(error.message || "An error occurred");
