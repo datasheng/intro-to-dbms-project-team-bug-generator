@@ -11,26 +11,6 @@ const queries = [
         `,
   },
   {
-    name: "Student",
-    query: `
-            CREATE TABLE IF NOT EXISTS Student (
-                student_id CHAR(36) PRIMARY KEY,
-                user_id CHAR(36),
-                FOREIGN KEY (user_id) REFERENCES User(user_id)
-            )
-        `,
-  },
-  {
-    name: "Instructor",
-    query: `
-            CREATE TABLE IF NOT EXISTS Instructor (
-                instructor_id CHAR(36) PRIMARY KEY,
-                user_id CHAR(36),
-                FOREIGN KEY (user_id) REFERENCES User(user_id)
-            )
-        `,
-  },
-  {
     name: "Course",
     query: `
             CREATE TABLE IF NOT EXISTS Course (
@@ -38,7 +18,7 @@ const queries = [
                 instructor_id CHAR(36),
                 course_name VARCHAR(255),
                 course_description VARCHAR(255),
-                FOREIGN KEY (instructor_id) REFERENCES Instructor(instructor_id)
+                FOREIGN KEY (instructor_id) REFERENCES User(user_id)
             )
         `,
   },
@@ -52,7 +32,7 @@ const queries = [
                 enrollment_status VARCHAR(20),
                 enrollment_date INT,
                 FOREIGN KEY (course_id) REFERENCES Course(course_id),
-                FOREIGN KEY (student_id) REFERENCES Student(student_id)
+                FOREIGN KEY (student_id) REFERENCES User(user_id)
             )
         `,
   },
