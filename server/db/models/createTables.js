@@ -18,6 +18,8 @@ const queries = [
                 instructor_id CHAR(36),
                 course_name VARCHAR(255),
                 course_description VARCHAR(255),
+                course_details TEXT,
+                course_price DECIMAL(10, 2),
                 FOREIGN KEY (instructor_id) REFERENCES User(user_id)
             )
         `,
@@ -43,7 +45,6 @@ const queries = [
                 lesson_id CHAR(36) PRIMARY KEY,
                 course_id CHAR(36),
                 lesson_title VARCHAR(255),
-                lcompletion_status BOOL,
                 FOREIGN KEY (course_id) REFERENCES Course(course_id)
             )
         `,
