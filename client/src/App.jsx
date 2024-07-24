@@ -4,6 +4,7 @@ import { BookOpen, Users, Award } from "lucide-react";
 // Import the LoginRegister component we created earlier
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
+// import InstructorPage from "./components/InstructorPage";
 
 const Navbar = () => (
   <nav className="bg-white shadow-lg">
@@ -93,6 +94,7 @@ const App = () => {
           <Route path="/signin" element={<LoginRegister isLogin={true} />} />
           <Route path="/register" element={<LoginRegister isLogin={false} />} />
           <Route path="/selection" element={<SelectionPage />} />
+          {/* <Route path="/instructor" element={<InstructorPage />} /> */}
           {/* Add more routes as needed */}
         </Routes>
       </div>
