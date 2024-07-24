@@ -106,13 +106,6 @@ router.post("/login", async (req, res) => {
             expiresIn: 86400,
           }
         );
-        // refactor this once frontend is built and served by the same server
-        // since we return a cookie here for further api requests but also
-        // create a cookie on the frontend
-        res.cookie("auth", token, {
-          httpOnly: true,
-          maxAge: 86400 * 1000,
-        });
         res.status(200).send({
           success: true,
           message: "Login successful",
