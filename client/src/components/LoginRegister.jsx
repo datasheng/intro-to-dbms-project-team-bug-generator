@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const LoginRegister = ({ isLogin: initialIsLogin }) => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     setIsLogin(initialIsLogin);
@@ -57,7 +58,7 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
         const data = await response.json();
         console.log("Login successful:", data);
         // Handle successful login Redirect to /selection
-        navigate('/selection');
+        navigate("/selection");
       } else {
         const response = await fetch("http://localhost:3000/auth/register", {
           method: "POST",
@@ -78,8 +79,13 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
 
         const data = await response.json();
         console.log("Registration successful:", data);
-        // Handle successful registration
-        navigate('/selection');
+        if (data.success) {
+          setShowSuccessPopup(true);
+          setTimeout(() => {
+            setShowSuccessPopup(false);
+            setIsLogin(true);
+          }, 3000);
+        }
       }
     } catch (error) {
       setError(error.message || "An error occurred");
@@ -92,6 +98,15 @@ const LoginRegister = ({ isLogin: initialIsLogin }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {showSuccessPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg">
+            <p className="text-center">
+              Registration successful! You can now log in.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
