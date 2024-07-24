@@ -15,6 +15,9 @@ import {
   ChevronDown,
   ChevronUp,
   GraduationCap,
+  DollarSign,
+  Globe,
+  Clock,
 } from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
@@ -28,6 +31,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const Navbar = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -102,46 +111,99 @@ const Navbar = ({ user, onLogout }) => {
 };
 
 const Feature = ({ icon, title, description }) => (
-  <div className="p-6 border rounded-lg shadow-sm">
-    {icon}
-    <h3 className="mt-5 mb-2 text-lg font-semibold">{title}</h3>
-    <p className="text-gray-600">{description}</p>
-  </div>
+  <Card className="flex flex-col items-center text-center">
+    <CardHeader className="items-center">
+      {" "}
+      {}
+      <div className="mb-4">{icon}</div>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardDescription className="text-center px-4 pb-4">
+      {description}
+    </CardDescription>
+  </Card>
 );
 
 const HomePage = () => (
   <div className="container mx-auto px-4">
     <section className="text-center py-20">
-      <h1 className="text-4xl font-bold mb-4">Welcome to Chalkboard</h1>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
+        Welcome to Chalkboard
+      </h1>
       <p className="text-xl mb-8">Your Digital Course Inventory Platform</p>
-      <Link
-        to="/courses"
-        className="bg-indigo-500 text-white font-bold py-2 px-4 rounded hover:bg-indigo-600 transition duration-300"
-      >
-        Explore Courses
+      <Link to="/courses">
+        <Button
+          size="lg"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+        >
+          Explore Courses
+        </Button>
       </Link>
     </section>
 
     <section className="py-20">
-      <h2 className="text-3xl font-bold text-center mb-12">
+      <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 mb-12 text-center">
         Why Choose Chalkboard?
       </h2>
       <div className="grid md:grid-cols-3 gap-8">
         <Feature
           icon={<BookOpen className="h-12 w-12 text-indigo-500" />}
           title="Wide Range of Courses"
-          description="Access a diverse selection of courses from various disciplines."
+          description="Access a diverse selection of courses from various disciplines, catering to all learning needs and interests."
         />
         <Feature
           icon={<Users className="h-12 w-12 text-indigo-500" />}
           title="Learn or Teach"
-          description="Sign up as a student or create your own courses as an instructor."
+          description="Sign up as a student to learn, or become an instructor to share your expertise with a global audience."
         />
         <Feature
           icon={<Award className="h-12 w-12 text-indigo-500" />}
           title="Earn Certificates"
-          description="Complete courses and earn certificates to boost your skills."
+          description="Complete courses and earn certificates to boost your skills and enhance your professional profile."
         />
+        <Feature
+          icon={<DollarSign className="h-12 w-12 text-indigo-500" />}
+          title="Monetize Your Skills"
+          description="As an instructor, charge for your courses and turn your knowledge into earnings."
+        />
+        <Feature
+          icon={<Globe className="h-12 w-12 text-indigo-500" />}
+          title="Global Community"
+          description="Connect with learners and instructors from around the world, expanding your network and perspectives."
+        />
+        <Feature
+          icon={<Clock className="h-12 w-12 text-indigo-500" />}
+          title="Learn at Your Pace"
+          description="Access course materials anytime, anywhere. Learn on your schedule with our flexible platform."
+        />
+      </div>
+    </section>
+
+    <section className="py-20 bg-indigo-50 rounded-lg text-center">
+      <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 mb-4">
+        Ready to Start Your Learning Journey?
+      </h2>
+      <p className="text-xl mb-8">
+        Join Chalkboard today and unlock a world of knowledge!
+      </p>
+      <div className="flex justify-center space-x-4">
+        <Link to="/register">
+          <Button
+            size="lg"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            Sign Up
+          </Button>
+        </Link>
+        <Link to="/signin">
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+          >
+            Log In
+          </Button>
+        </Link>
       </div>
     </section>
   </div>
