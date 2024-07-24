@@ -6,13 +6,31 @@ import {
   Routes,
   useNavigate,
 } from "react-router-dom";
-import { BookOpen, Users, Award, User, LogOut } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  Award,
+  User,
+  LogOut,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
 import StudentDashboard from "./components/StudentDashboard";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = ({ user, onLogout }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <nav className="bg-white shadow-lg">
       <div className="max-w-6xl mx-auto px-4">
@@ -28,29 +46,49 @@ const Navbar = ({ user, onLogout }) => {
           </div>
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
-              <>
-                <div className="flex items-center">
-                  <User className="mr-2 h-4 w-4 text-gray-500" />
-                  <span className="font-medium text-gray-500">{user}</span>
-                </div>
-                <Button onClick={onLogout} variant="outline">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-              </>
+              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{user}</span>
+                    {isOpen ? (
+                      <ChevronUp className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Link to="/dashboard">
+                    <DropdownMenuItem>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={onLogout}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
-                <Link
-                  to="/signin"
-                  className="py-2 px-2 font-medium text-gray-500 rounded hover:bg-indigo-500 hover:text-white transition duration-300"
-                >
-                  Sign In
+                <Link to="/signin">
+                  <Button variant="ghost">Sign In</Button>
                 </Link>
-                <Link
-                  to="/register"
-                  className="py-2 px-2 font-medium text-white bg-indigo-500 rounded hover:bg-indigo-400 transition duration-300"
-                >
-                  Register
+                <Link to="/register">
+                  <Button
+                    variant="primary"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    Register
+                  </Button>
                 </Link>
               </>
             )}
@@ -145,7 +183,7 @@ const AppContent = () => {
 
   const handleLogout = async () => {
     try {
-      document.cookie = "";
+      document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       setUser(null);
       navigate("/");
     } catch (error) {
