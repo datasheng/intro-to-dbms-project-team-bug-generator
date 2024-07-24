@@ -4,7 +4,27 @@ import { BookOpen, Users, Award } from "lucide-react";
 // Import the LoginRegister component we created earlier
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
+<<<<<<< Updated upstream
 // import InstructorPage from "./components/InstructorPage";
+=======
+import StudentDashboard from "./components/StudentDashboard";
+import InstructorCenter from "./components/InstructorCenter";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+>>>>>>> Stashed changes
 
 const Navbar = () => (
   <nav className="bg-white shadow-lg">
@@ -84,6 +104,82 @@ const HomePage = () => (
   </div>
 );
 
+<<<<<<< Updated upstream
+=======
+const AppContent = () => {
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        if (
+          document.cookie
+            .split(";")
+            .some((item) => item.trim().startsWith("auth="))
+        ) {
+          const response = await fetch("http://localhost:3000/auth/verify", {
+            credentials: "include",
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user.name);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error checking authentication status:", error);
+        setUser(null);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData.fullName);
+    navigate("/dashboard");
+  };
+
+  const handleLogout = async () => {
+    try {
+      document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      setUser(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar user={user} onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/signin"
+          element={
+            <LoginRegister isLogin={true} onLoginSuccess={handleLogin} />
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <LoginRegister isLogin={false} onLoginSuccess={handleLogin} />
+          }
+        />
+        <Route path="/selection" element={<SelectionPage user={user} />} />
+        <Route path="/dashboard" element={<StudentDashboard user={user} />} />
+        <Route path="/InstructorCenter" element={<InstructorCenter user={user} />} />
+        
+        {/* Add more routes as needed */}
+      </Routes>
+    </div>
+  );
+};
+
+>>>>>>> Stashed changes
 const App = () => {
   return (
     <Router>
