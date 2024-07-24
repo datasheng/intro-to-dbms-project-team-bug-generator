@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const SelectionPage = () => {
   return (
@@ -6,9 +7,9 @@ const SelectionPage = () => {
       <button className="w-1/2 bg-red-400 text-white text-2xl font-bold">
         Instructor
       </button>
-      <button className="w-1/2 bg-indigo-400 text-white text-2xl font-bold">
+      <Link to='/dashboard' className="w-1/2 bg-indigo-400 text-white text-2xl font-bold flex items-center justify-center">
         Student
-      </button>
+      </Link>
     </div>
   );
 };
