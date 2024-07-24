@@ -23,6 +23,7 @@ import {
 import LoginRegister from "./components/LoginRegister";
 import SelectionPage from "./components/Selection";
 import StudentDashboard from "./components/StudentDashboard";
+import InstructorCenter from "./components/InstructorCenter";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -283,6 +284,7 @@ const AppContent = () => {
         />
         <Route path="/selection" element={<SelectionPage user={user} />} />
         <Route path="/dashboard" element={<StudentDashboard user={user} />} />
+        <Route path="/instructor" element={<InstructorCenter user={user} />} />
         {/* Add more routes as needed */}
       </Routes>
     </div>

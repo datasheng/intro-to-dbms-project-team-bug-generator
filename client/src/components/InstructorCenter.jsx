@@ -26,6 +26,7 @@ const mockInstructorCourses = [
     id: 1,
     title: "Introduction to React",
     description: "Learn the basics of React and build your first app.",
+    price: 49.99,
     enrolledStudents: [
       { id: 1, name: "John Doe", email: "john@example.com" },
       { id: 2, name: "Jane Smith", email: "jane@example.com" },
@@ -35,6 +36,7 @@ const mockInstructorCourses = [
     id: 2,
     title: "Advanced JavaScript",
     description: "Dive deep into JavaScript concepts and advanced techniques.",
+    price: 69.99,
     enrolledStudents: [
       { id: 3, name: "Bob Johnson", email: "bob@example.com" },
     ],
@@ -52,19 +54,29 @@ const CourseCard = ({ course, onClick }) => (
     <CardContent>
       <p className="line-clamp-2">{course.description}</p>
     </CardContent>
-    <CardFooter>
-      <p className="text-sm text-gray-500">
-        Enrolled Students: {course.enrolledStudents.length}
-      </p>
+    <CardFooter >
+      <div className="flex flex-col">
+        <p className="text-sm text-gray-500">
+          Enrolled Students: {course.enrolledStudents.length}
+        </p>
+        <p className="text-sm text-gray-500">
+          Price: ${course.price || 0}
+        </p>
+      </div>
     </CardFooter>
   </Card>
 );
 
-const CourseDetails = ({ course, onBack, onSave }) => {
+const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
   const [editedCourse, setEditedCourse] = useState(course);
+
 
   const handleSave = () => {
     onSave(editedCourse);
+  };
+
+  const handleDelete = () => {
+    onDelete(editedCourse.id);
   };
 
   return (
@@ -112,7 +124,8 @@ const CourseDetails = ({ course, onBack, onSave }) => {
             </ScrollArea>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className='flex justify-between'>
+          <Button onClick={handleDelete} className='bg-red-500 text-white'>Delete Course</Button>
           <Button onClick={handleSave}>Save Changes</Button>
         </CardFooter>
       </Card>
@@ -184,7 +197,9 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
               <Button onClick={handlePrevious} variant="outline">
                 Previous
               </Button>
-              <Button onClick={handleCreate}>Create Course</Button>
+              <Button onClick={handleCreate}>
+                Create Course
+              </Button>
             </div>
           </div>
         )}
@@ -216,10 +231,15 @@ const InstructorCenter = () => {
     setSelectedCourse(null);
   };
 
+  const handleDeleteCourse = (courseId) => {
+    setCourses(courses.filter(course => course.id !== courseId));
+    setSelectedCourse(null);
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-indigo-700">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-red-500">
           Instructor Center
         </h1>
         <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -232,6 +252,7 @@ const InstructorCenter = () => {
           course={selectedCourse}
           onBack={() => setSelectedCourse(null)}
           onSave={handleSaveCourse}
+          onDelete={handleDeleteCourse}
         />
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]">
