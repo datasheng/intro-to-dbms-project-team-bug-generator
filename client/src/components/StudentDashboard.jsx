@@ -54,7 +54,10 @@ const CourseDetails = ({ course, onBack, onEnroll }) => (
         </p>
       </CardContent>
       <CardFooter>
-        <Button onClick={() => onEnroll(course.course_id)}>
+        <Button
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          onClick={() => onEnroll(course.course_id)}
+        >
           <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
         </Button>
       </CardFooter>
