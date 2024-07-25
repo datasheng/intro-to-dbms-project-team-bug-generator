@@ -18,10 +18,10 @@ import {
   DollarSign,
   Globe,
   Clock,
-  ArrowLeftRight,
+  BookText,
+  Presentation,
 } from "lucide-react";
 import LoginRegister from "./components/LoginRegister";
-import SelectionPage from "./components/Selection";
 import StudentDashboard from "./components/StudentDashboard";
 import InstructorCenter from "./components/InstructorCenter";
 import { Button } from "@/components/ui/button";
@@ -77,15 +77,15 @@ const Navbar = ({ user, onLogout }) => {
                   <DropdownMenuSeparator />
                   <Link to="/dashboard">
                     <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
+                      <BookText className="mr-2 h-4 w-4" />
+                      <span>Student Dashboard</span>
                     </DropdownMenuItem>
-                    <Link to="/selection">
-                      <DropdownMenuItem>
-                        <ArrowLeftRight className="mr-2 h-4 w-4" />
-                        <span>Switch Role</span>
-                      </DropdownMenuItem>
-                    </Link>
+                  </Link>
+                  <Link to="/instructor-center">
+                    <DropdownMenuItem>
+                      <Presentation className="mr-2 h-4 w-4" />
+                      <span>Instructor Center</span>
+                    </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -282,9 +282,11 @@ const AppContent = () => {
             <LoginRegister isLogin={false} onLoginSuccess={handleLogin} />
           }
         />
-        <Route path="/selection" element={<SelectionPage user={user} />} />
         <Route path="/dashboard" element={<StudentDashboard user={user} />} />
-        <Route path="/instructor" element={<InstructorCenter user={user} />} />
+        <Route
+          path="/instructor-center"
+          element={<InstructorCenter user={user} />}
+        />
         {/* Add more routes as needed */}
       </Routes>
     </div>

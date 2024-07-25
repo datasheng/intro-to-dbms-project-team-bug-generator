@@ -58,7 +58,7 @@ const LoginRegister = ({ isLogin: initialIsLogin, onLoginSuccess }) => {
         const data = await response.json();
         document.cookie = `auth=${data.auth}; path=/; max-age=86400; SameSite=Strict; Secure`;
         onLoginSuccess({ fullName: data.displayName });
-        navigate("/selection");
+        navigate("/dashboard");
       } else {
         const response = await fetch("http://localhost:3000/auth/register", {
           method: "POST",
