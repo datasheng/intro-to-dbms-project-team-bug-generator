@@ -22,14 +22,14 @@ const CourseCard = ({ course, onClick }) => (
   >
     <CardHeader>
       <CardTitle>{course.course_name}</CardTitle>
-      <CardDescription>{course.course_id}</CardDescription>
+      <CardDescription>Instructor: {course.instructor_name}</CardDescription>
     </CardHeader>
     <CardContent>
       <p className="line-clamp-2">{course.course_description}</p>
     </CardContent>
     <CardFooter>
       <p className="text-sm text-gray-500">
-        Instructor: {course.instructor_name}
+        {course.course_price > 0 ? `$${course.course_price}` : "Free"}
       </p>
     </CardFooter>
   </Card>
@@ -58,7 +58,10 @@ const CourseDetails = ({ course, onBack, onEnroll }) => (
           className="bg-indigo-600 hover:bg-indigo-700 text-white"
           onClick={() => onEnroll(course.course_id)}
         >
-          <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
+          <BookOpen className="mr-2 h-4 w-4" />{" "}
+          {course.course_price > 0
+            ? `Enroll for $${course.course_price}`
+            : "Enroll in Course"}
         </Button>
       </CardFooter>
     </Card>
@@ -180,7 +183,7 @@ const StudentDashboard = () => {
         >
           <TabsList>
             <TabsTrigger value="browse">Browse Courses</TabsTrigger>
-            <TabsTrigger value="my-courses">My Courses</TabsTrigger>
+            <TabsTrigger value="my-courses">Enrolled Courses</TabsTrigger>
           </TabsList>
 
           <TabsContent value="browse" className="space-y-4">
