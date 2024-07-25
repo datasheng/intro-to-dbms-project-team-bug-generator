@@ -11,7 +11,13 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Search, BookOpen, ChevronLeft } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  BookOpen,
+  ChevronLeft,
+  CreditCard,
+} from "lucide-react";
 
 const API_URL = "http://localhost:3000";
 
@@ -25,10 +31,10 @@ const CourseCard = ({ course, onClick }) => (
       <CardDescription>Instructor: {course.instructor_name}</CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="line-clamp-2">{course.course_description}</p>
+      <p className="text-sm text-gray-500">{course.course_description}</p>
     </CardContent>
     <CardFooter>
-      <p className="text-sm text-gray-500">
+      <p className="">
         {course.course_price > 0 ? `$${course.course_price}` : "Free"}
       </p>
     </CardFooter>
@@ -45,23 +51,28 @@ const CourseDetails = ({ course, onBack, onEnroll }) => (
         <CardTitle className="text-2xl font-bold">
           {course.course_name}
         </CardTitle>
-        <CardDescription>{course.course_id}</CardDescription>
+        <CardDescription>Instructor: {course.instructor_name}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="mb-4">{course.course_description}</p>
-        <p className="text-sm text-gray-500">
-          Instructor: {course.instructor_name}
-        </p>
+        <p className="text-sm text-gray-500">{course.course_description}</p>
+        <br></br>
+        <p className="mb-4">{course.course_details}</p>
       </CardContent>
       <CardFooter>
         <Button
           className="bg-indigo-600 hover:bg-indigo-700 text-white"
           onClick={() => onEnroll(course.course_id)}
         >
-          <BookOpen className="mr-2 h-4 w-4" />{" "}
-          {course.course_price > 0
-            ? `Enroll for $${course.course_price}`
-            : "Enroll in Course"}
+          {course.course_price > 0 ? (
+            <>
+              <CreditCard className="mr-2 h-4 w-4" /> Enroll for $
+              {course.course_price}
+            </>
+          ) : (
+            <>
+              <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>
@@ -75,7 +86,7 @@ const StudentDashboard = () => {
   const [myCourses, setMyCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("browse");
+  const [activeTab, setActiveTab] = useState("enrolled-courses");
 
   const fetchCourses = async (endpoint) => {
     setIsLoading(true);
@@ -98,10 +109,10 @@ const StudentDashboard = () => {
   };
 
   useEffect(() => {
-    if (activeTab === "browse") {
-      fetchCourses("/api/courses").then(setBrowseCourses);
-    } else if (activeTab === "my-courses") {
+    if (activeTab === "enrolled-courses") {
       fetchCourses("/api/enrollments").then(setMyCourses);
+    } else if (activeTab === "browse") {
+      fetchCourses("/api/courses").then(setBrowseCourses);
     }
   }, [activeTab]);
 
@@ -114,7 +125,7 @@ const StudentDashboard = () => {
   const handleEnroll = async (courseId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/enroll`, {
+      const response = await fetch(`${API_URL}/api/enrollments/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,8 +138,8 @@ const StudentDashboard = () => {
       }
       // Refresh the course lists after successful enrollment
       await Promise.all([
-        fetchCourses("/api/courses").then(setBrowseCourses),
         fetchCourses("/api/enrollments").then(setMyCourses),
+        fetchCourses("/api/courses").then(setBrowseCourses),
       ]);
       setSelectedCourse((prev) => ({ ...prev, enrolled: true }));
     } catch (error) {
@@ -182,8 +193,9 @@ const StudentDashboard = () => {
           className="space-y-4"
         >
           <TabsList>
+            <TabsTrigger value="enrolled-courses">Enrolled Courses</TabsTrigger>
             <TabsTrigger value="browse">Browse Courses</TabsTrigger>
-            <TabsTrigger value="my-courses">Enrolled Courses</TabsTrigger>
+            <TabsTrigger value="past-courses">Past Courses</TabsTrigger>
           </TabsList>
 
           <TabsContent value="browse" className="space-y-4">
@@ -213,7 +225,7 @@ const StudentDashboard = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="my-courses">
+          <TabsContent value="enrolled-courses">
             {isLoading ? (
               <div className="flex justify-center items-center h-[calc(100vh-200px)]">
                 <Loader2 className="h-8 w-8 animate-spin" />
