@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft, Plus, ChevronRight } from "lucide-react";
 
 const mockInstructorCourses = [
   {
@@ -125,7 +125,12 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
           <Button onClick={handleDelete} className="bg-red-500 text-white">
             Delete Course
           </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button
+            className="bg-violet-600 hover:bg-violet-700 text-white"
+            onClick={handleSave}
+          >
+            Save
+          </Button>
         </CardFooter>
       </Card>
     </div>
@@ -152,7 +157,7 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Course</DialogTitle>
+          <DialogTitle>Create Course</DialogTitle>
         </DialogHeader>
         {step === 1 && (
           <div className="space-y-4">
@@ -176,13 +181,20 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                 }
               />
             </div>
-            <Button onClick={handleNext}>Next</Button>
+            <Button
+              className="bg-violet-600 hover:bg-violet-700 text-white"
+              style={{ float: "right" }}
+              onClick={handleNext}
+            >
+              Next
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         )}
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="content">Course Content</Label>
+              <Label htmlFor="content">Course Details</Label>
               <Textarea
                 id="content"
                 value={newCourse.content}
@@ -194,9 +206,15 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
             </div>
             <div className="flex justify-between">
               <Button onClick={handlePrevious} variant="outline">
+                <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
-              <Button onClick={handleCreate}>Create Course</Button>
+              <Button
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+                onClick={handleCreate}
+              >
+                Create Course
+              </Button>
             </div>
           </div>
         )}
@@ -239,8 +257,11 @@ const InstructorCenter = () => {
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-violet-500">
           Instructor Center
         </h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create New Course
+        <Button
+          className="bg-violet-600 hover:bg-violet-700 text-white"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Create Course
         </Button>
       </div>
 
