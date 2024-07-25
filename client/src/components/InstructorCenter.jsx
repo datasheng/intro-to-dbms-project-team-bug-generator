@@ -54,14 +54,12 @@ const CourseCard = ({ course, onClick }) => (
     <CardContent>
       <p className="line-clamp-2">{course.description}</p>
     </CardContent>
-    <CardFooter >
+    <CardFooter>
       <div className="flex flex-col">
         <p className="text-sm text-gray-500">
           Enrolled Students: {course.enrolledStudents.length}
         </p>
-        <p className="text-sm text-gray-500">
-          Price: ${course.price || 0}
-        </p>
+        <p className="text-sm text-gray-500">Price: ${course.price || 0}</p>
       </div>
     </CardFooter>
   </Card>
@@ -69,7 +67,6 @@ const CourseCard = ({ course, onClick }) => (
 
 const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
   const [editedCourse, setEditedCourse] = useState(course);
-
 
   const handleSave = () => {
     onSave(editedCourse);
@@ -124,8 +121,10 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             </ScrollArea>
           </div>
         </CardContent>
-        <CardFooter className='flex justify-between'>
-          <Button onClick={handleDelete} className='bg-red-500 text-white'>Delete Course</Button>
+        <CardFooter className="flex justify-between">
+          <Button onClick={handleDelete} className="bg-red-500 text-white">
+            Delete Course
+          </Button>
           <Button onClick={handleSave}>Save Changes</Button>
         </CardFooter>
       </Card>
@@ -197,9 +196,7 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
               <Button onClick={handlePrevious} variant="outline">
                 Previous
               </Button>
-              <Button onClick={handleCreate}>
-                Create Course
-              </Button>
+              <Button onClick={handleCreate}>Create Course</Button>
             </div>
           </div>
         )}
@@ -232,14 +229,14 @@ const InstructorCenter = () => {
   };
 
   const handleDeleteCourse = (courseId) => {
-    setCourses(courses.filter(course => course.id !== courseId));
+    setCourses(courses.filter((course) => course.id !== courseId));
     setSelectedCourse(null);
   };
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-red-500">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-violet-500">
           Instructor Center
         </h1>
         <Button onClick={() => setIsCreateModalOpen(true)}>
