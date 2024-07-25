@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -126,7 +126,7 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             Delete Course
           </Button>
           <Button
-            className="bg-violet-600 hover:bg-violet-700 text-white"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
             onClick={handleSave}
           >
             Save
@@ -182,7 +182,7 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
               />
             </div>
             <Button
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
               style={{ float: "right" }}
               onClick={handleNext}
             >
@@ -210,7 +210,7 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                 Previous
               </Button>
               <Button
-                className="bg-violet-600 hover:bg-violet-700 text-white"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 onClick={handleCreate}
               >
                 Create Course
@@ -254,11 +254,11 @@ const InstructorCenter = () => {
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-violet-500">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-indigo-700 mb-6">
           Instructor Center
         </h1>
         <Button
-          className="bg-violet-600 hover:bg-violet-700 text-white"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
           onClick={() => setIsCreateModalOpen(true)}
         >
           <Plus className="mr-2 h-4 w-4" /> Create Course

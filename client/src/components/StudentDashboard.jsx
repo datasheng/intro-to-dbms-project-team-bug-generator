@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Loader2,
-  Search,
-  BookOpen,
-  ChevronLeft,
-  CreditCard,
-} from "lucide-react";
+import { Loader2, BookOpen, ChevronLeft, CreditCard } from "lucide-react";
 
 const API_URL = "http://localhost:3000";
 
