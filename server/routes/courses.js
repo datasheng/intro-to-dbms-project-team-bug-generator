@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/courses", (_req, res) => {
   try {
     db.query(
-      `SELECT c.course_id, c.course_name, c.course_description, c.instructor_id, c.course_price, u.full_name as instructor_name
+      `SELECT c.course_id, c.course_name, c.course_description, c.instructor_id, c.course_price, c.course_details, u.full_name as instructor_name
       FROM Course c
       JOIN User u ON c.instructor_id = u.user_id;`,
       async (err, results) => {
@@ -35,6 +35,7 @@ router.get("/enrollments", verifyToken, (req, res) => {
             c.course_name,
             c.course_description,
             c.course_price,
+            c.course_details,
             u.full_name AS instructor_name
         FROM 
             Enrollment e
@@ -59,6 +60,55 @@ router.get("/enrollments", verifyToken, (req, res) => {
     );
   } catch (error) {
     console.error("Error fetching enrollments:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.post("/enrollments/create", verifyToken, (req, res) => {
+  try {
+    const { courseId } = req.body;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
+    db.query(
+      `SELECT * FROM Enrollment WHERE course_id = ? AND student_id = ?`,
+      [courseId, req.userId],
+      (checkErr, checkResults) => {
+        if (checkErr) {
+          console.error("Error checking existing enrollment:", checkErr);
+          return res
+            .status(500)
+            .send({ success: false, message: "Internal Server Error" });
+        }
+
+        if (checkResults.length > 0) {
+          return res.status(400).json({
+            success: false,
+            message: "You are already enrolled in this course",
+          });
+        }
+
+        db.query(
+          `INSERT INTO Enrollment (enrollment_id, course_id, student_id, enrollment_status, enrollment_date)
+           VALUES (UUID(), ?, ?, 'active', ?);`,
+          [courseId, req.userId, currentTimestamp],
+          (err) => {
+            if (err) {
+              console.error("Error creating enrollment:", err);
+              return res
+                .status(500)
+                .send({ success: false, message: "Internal Server Error" });
+            }
+
+            res.json({
+              success: true,
+              message: "Enrollment created successfully",
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error creating enrollment:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
