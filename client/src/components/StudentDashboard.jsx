@@ -11,9 +11,36 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, BookOpen, ChevronLeft, CreditCard } from "lucide-react";
+import {
+  Loader2,
+  BookOpen,
+  ChevronLeft,
+  CreditCard,
+  CheckCircle,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 
 const API_URL = "http://localhost:3000";
+
+const formatDate = (unixTimestamp) => {
+  const date = new Date(unixTimestamp * 1000);
+  return date.toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  });
+};
 
 const CourseCard = ({ course, onClick }) => (
   <Card
@@ -35,49 +62,189 @@ const CourseCard = ({ course, onClick }) => (
   </Card>
 );
 
-const CourseDetails = ({ course, onBack, onEnroll }) => (
-  <div className="space-y-6">
-    <Button onClick={onBack} variant="ghost">
-      <ChevronLeft className="mr-2 h-4 w-4" /> Back to Courses
-    </Button>
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">
-          {course.course_name}
-        </CardTitle>
-        <CardDescription>Instructor: {course.instructor_name}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-500">{course.course_description}</p>
-        <br></br>
-        <p className="mb-4">{course.course_details}</p>
-      </CardContent>
-      <CardFooter>
-        <Button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
-          onClick={() => onEnroll(course.course_id)}
-        >
-          {course.course_price > 0 ? (
+const CourseDetails = ({
+  course,
+  onBack,
+  onEnroll,
+  onWithdraw,
+  enrollmentStatus,
+  enrollmentDate,
+  enrollmentId,
+}) => {
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  const handleEnrollClick = () => {
+    if (course.course_price > 0) {
+      setIsPaymentDialogOpen(true);
+    } else {
+      onEnroll(course.course_id);
+    }
+  };
+
+  const handlePaymentSubmit = (e) => {
+    e.preventDefault();
+    setIsPaymentDialogOpen(false);
+    setPaymentConfirmed(true);
+    setTimeout(() => {
+      setPaymentConfirmed(false);
+      onEnroll(course.course_id);
+    }, 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Button onClick={onBack} variant="ghost">
+        <ChevronLeft className="mr-2 h-4 w-4" /> Back to Courses
+      </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            {course.course_name}
+          </CardTitle>
+          <CardDescription>
+            Instructor: {course.instructor_name}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-500">{course.course_description}</p>
+          <br />
+          <p className="mb-4">{course.course_details}</p>
+        </CardContent>
+        <CardFooter className="flex flex-col items-start">
+          {enrollmentStatus === "active" ? (
             <>
-              <CreditCard className="mr-2 h-4 w-4" /> Enroll for $
-              {course.course_price}
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled
+              >
+                <CheckCircle className="mr-2 h-4 w-4" /> Currently Enrolled
+              </Button>
+              <p className="text-sm text-gray-500 mt-2">
+                Enrolled on {formatDate(enrollmentDate)}
+              </p>
             </>
           ) : (
             <>
-              <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                onClick={handleEnrollClick}
+              >
+                {course.course_price > 0 ? (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" /> Enroll for $
+                    {course.course_price}
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="mr-2 h-4 w-4" /> Enroll in Course
+                  </>
+                )}
+              </Button>
+              {enrollmentStatus && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {enrollmentStatus === "completed"
+                    ? `You previously completed this course after enrolling on ${formatDate(
+                        enrollmentDate
+                      )}`
+                    : enrollmentStatus === "withdrawn"
+                    ? `You previously withdrew from this course after enrolling on ${formatDate(
+                        enrollmentDate
+                      )}`
+                    : `Previous enrollment status: ${enrollmentStatus} (Enrolled on ${formatDate(
+                        enrollmentDate
+                      )})`}
+                </p>
+              )}
             </>
           )}
-        </Button>
-      </CardFooter>
-    </Card>
-  </div>
-);
+          {enrollmentStatus === "active" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="mt-4">
+                  Unenroll from Course
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Are you sure you want to unenroll?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. You may lose access to course
+                    materials and progress.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onWithdraw(enrollmentId)}>
+                    Confirm Unenroll
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </CardFooter>
+      </Card>
+      <AlertDialog
+        open={isPaymentDialogOpen}
+        onOpenChange={setIsPaymentDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enter Payment Information</AlertDialogTitle>
+          </AlertDialogHeader>
+          <form onSubmit={handlePaymentSubmit}>
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="cardName">Name on Card</Label>
+                <Input id="cardName" placeholder="John Doe" />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="cardNumber">Card Number</Label>
+                <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="expiry">Expiry Date</Label>
+                  <Input id="expiry" placeholder="MM/YY" />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="cvc">CVC</Label>
+                  <Input id="cvc" placeholder="123" />
+                </div>
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction type="submit">
+                Submit Payment
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={paymentConfirmed} onOpenChange={setPaymentConfirmed}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Payment Confirmed</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your payment has been processed successfully. You will be enrolled
+              in the course shortly.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
 
 const StudentDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [browseCourses, setBrowseCourses] = useState([]);
-  const [myCourses, setMyCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [pastCourses, setPastCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("enrolled-courses");
@@ -87,7 +254,7 @@ const StudentDashboard = () => {
     setError(null);
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
-        credentials: "include", // to include the auth cookie
+        credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Failed to fetch courses");
@@ -103,8 +270,18 @@ const StudentDashboard = () => {
   };
 
   useEffect(() => {
-    if (activeTab === "enrolled-courses") {
-      fetchCourses("/api/enrollments").then(setMyCourses);
+    const fetchAllCourses = async () => {
+      const allEnrollments = await fetchCourses("/api/enrollments");
+      setEnrolledCourses(
+        allEnrollments.filter((course) => course.enrollment_status === "active")
+      );
+      setPastCourses(
+        allEnrollments.filter((course) => course.enrollment_status !== "active")
+      );
+    };
+
+    if (activeTab === "enrolled-courses" || activeTab === "past-courses") {
+      fetchAllCourses();
     } else if (activeTab === "browse") {
       fetchCourses("/api/courses").then(setBrowseCourses);
     }
@@ -130,14 +307,54 @@ const StudentDashboard = () => {
       if (!response.ok) {
         throw new Error("Failed to enroll");
       }
-      // Refresh the course lists after successful enrollment
-      await Promise.all([
-        fetchCourses("/api/enrollments").then(setMyCourses),
-        fetchCourses("/api/courses").then(setBrowseCourses),
-      ]);
-      setSelectedCourse((prev) => ({ ...prev, enrolled: true }));
+      const allEnrollments = await fetchCourses("/api/enrollments");
+      setEnrolledCourses(
+        allEnrollments.filter((course) => course.enrollment_status === "active")
+      );
+      setPastCourses(
+        allEnrollments.filter((course) => course.enrollment_status !== "active")
+      );
+      setBrowseCourses(await fetchCourses("/api/courses"));
+      setSelectedCourse((prev) => ({
+        ...prev,
+        enrollment_status: "active",
+        enrollment_date: Math.floor(Date.now() / 1000),
+      }));
     } catch (error) {
       setError("Error enrolling in course: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWithdraw = async (enrollmentId) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/enrollments/withdraw`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ enrollmentId }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to withdraw from course");
+      }
+      const allEnrollments = await fetchCourses("/api/enrollments");
+      setEnrolledCourses(
+        allEnrollments.filter((course) => course.enrollment_status === "active")
+      );
+      setPastCourses(
+        allEnrollments.filter((course) => course.enrollment_status !== "active")
+      );
+      setBrowseCourses(await fetchCourses("/api/courses"));
+      setSelectedCourse((prev) => ({
+        ...prev,
+        enrollment_status: "withdrawn",
+      }));
+    } catch (error) {
+      setError("Error withdrawing from course: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +374,31 @@ const StudentDashboard = () => {
               .toLowerCase()
               .includes(searchTerm.toLowerCase())
         )
-      : myCourses;
+      : activeTab === "enrolled-courses"
+      ? enrolledCourses
+      : pastCourses;
+
+  const getEnrollmentInfo = (courseId) => {
+    const enrolledCourse = enrolledCourses.find(
+      (course) => course.course_id === courseId
+    );
+    if (enrolledCourse)
+      return {
+        status: "active",
+        date: enrolledCourse.enrollment_date,
+        id: enrolledCourse.enrollment_id,
+      };
+    const pastCourse = pastCourses.find(
+      (course) => course.course_id === courseId
+    );
+    return pastCourse
+      ? {
+          status: pastCourse.enrollment_status,
+          date: pastCourse.enrollment_date,
+          id: pastCourse.enrollment_id,
+        }
+      : { status: null, date: null, id: null };
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
@@ -179,6 +420,10 @@ const StudentDashboard = () => {
           course={selectedCourse}
           onBack={() => setSelectedCourse(null)}
           onEnroll={handleEnroll}
+          onWithdraw={handleWithdraw}
+          enrollmentStatus={getEnrollmentInfo(selectedCourse.course_id).status}
+          enrollmentDate={getEnrollmentInfo(selectedCourse.course_id).date}
+          enrollmentId={getEnrollmentInfo(selectedCourse.course_id).id}
         />
       ) : (
         <Tabs
@@ -227,7 +472,27 @@ const StudentDashboard = () => {
             ) : (
               <ScrollArea className="h-[calc(100vh-200px)]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {myCourses.map((course) => (
+                  {filteredCourses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      onClick={setSelectedCourse}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </TabsContent>
+
+          <TabsContent value="past-courses">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredCourses.map((course) => (
                     <CourseCard
                       key={course.id}
                       course={course}

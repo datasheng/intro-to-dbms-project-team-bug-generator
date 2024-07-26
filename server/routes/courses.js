@@ -36,7 +36,10 @@ router.get("/enrollments", verifyToken, (req, res) => {
             c.course_description,
             c.course_price,
             c.course_details,
-            u.full_name AS instructor_name
+            u.full_name AS instructor_name,
+            e.enrollment_status,
+            e.enrollment_date,
+            e.enrollment_id
         FROM 
             Enrollment e
         JOIN 
@@ -70,7 +73,7 @@ router.post("/enrollments/create", verifyToken, (req, res) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
     db.query(
-      `SELECT * FROM Enrollment WHERE course_id = ? AND student_id = ?`,
+      `SELECT * FROM Enrollment WHERE course_id = ? AND student_id = ? AND enrollment_status = 'active'`,
       [courseId, req.userId],
       (checkErr, checkResults) => {
         if (checkErr) {
@@ -109,6 +112,44 @@ router.post("/enrollments/create", verifyToken, (req, res) => {
     );
   } catch (error) {
     console.error("Error creating enrollment:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.post("/enrollments/withdraw", verifyToken, (req, res) => {
+  try {
+    const { enrollmentId } = req.body;
+    console.log(enrollmentId);
+    console.log(req.userId);
+
+    db.query(
+      `UPDATE enrollment 
+       SET enrollment_status = 'withdrawn'
+       WHERE enrollment_id = ? AND student_id = ?`,
+      [enrollmentId, req.userId],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating enrollment:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "Enrollment not found or not authorized",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "Enrollment withdrawn successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error updating enrollment:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
