@@ -196,7 +196,7 @@ const HomePage = ({ user }) => (
         Ready to Start Your Learning Journey?
       </h2>
       <p className="text-xl mb-8">
-        Join Chalkboard today and unlock a world of knowledge!
+        Join Chalkboard today and unlock a world of knowledge for free!
       </p>
       <div className="flex justify-center space-x-4">
         <Link to="/register">
