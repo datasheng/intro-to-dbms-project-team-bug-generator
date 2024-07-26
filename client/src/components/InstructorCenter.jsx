@@ -14,8 +14,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -236,6 +236,9 @@ const Lessons = ({ lessons, course }) => {
                   <Label>Lesson description</Label>
                   <Textarea placeholder="Lesson Content" />
                 </DialogHeader>
+                <DialogFooter>
+                  <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">Create Lesson</Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>

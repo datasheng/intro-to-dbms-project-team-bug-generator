@@ -56,7 +56,7 @@ const CourseExplorer = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/courses`);
+      const response = await fetch(`${API_URL}/api/courses/all`);
       if (!response.ok) {
         throw new Error("Failed to fetch courses");
       }
