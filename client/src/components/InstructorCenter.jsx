@@ -50,17 +50,17 @@ const CourseCard = ({ course, onClick }) => (
   >
     <CardHeader>
       <CardTitle>{course.title}</CardTitle>
+      <CardDescription>
+        {course.enrolledStudents.length} students enrolled
+      </CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="line-clamp-2">{course.description}</p>
+      <p className="text-sm text-gray-500">{course.description}</p>
     </CardContent>
     <CardFooter>
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-500">
-          Enrolled Students: {course.enrolledStudents.length}
-        </p>
-        <p className="text-sm text-gray-500">Price: ${course.price || 0}</p>
-      </div>
+      <p className="">
+        {course.course_price > 0 ? `$${course.course_price}` : "Free"}
+      </p>
     </CardFooter>
   </Card>
 );
