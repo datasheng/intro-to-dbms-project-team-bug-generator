@@ -119,8 +119,6 @@ router.post("/enrollments/create", verifyToken, (req, res) => {
 router.post("/enrollments/withdraw", verifyToken, (req, res) => {
   try {
     const { enrollmentId } = req.body;
-    console.log(enrollmentId);
-    console.log(req.userId);
 
     db.query(
       `UPDATE enrollment 
