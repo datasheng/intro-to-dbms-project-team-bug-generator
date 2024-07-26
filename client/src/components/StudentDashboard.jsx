@@ -470,10 +470,16 @@ const StudentDashboard = () => {
               <div className="flex justify-center items-center h-[calc(100vh-200px)]">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
+            ) : enrolledCourses.length === 0 ? (
+              <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+                <p className="text-gray-500 text-lg">
+                  You are not enrolled in any courses
+                </p>
+              </div>
             ) : (
               <ScrollArea className="h-[calc(100vh-200px)]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredCourses.map((course) => (
+                  {enrolledCourses.map((course) => (
                     <CourseCard
                       key={course.id}
                       course={course}
