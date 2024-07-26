@@ -224,7 +224,7 @@ const Lessons = ({ lessons, course }) => {
           <div className="flex justify-between items-center">
             <CardTitle>Lessons</CardTitle>
             <Dialog>
-              <DialogTrigger>
+              <DialogTrigger asChild>
                 <Button variant="outline" className="bg-indigo-600 hover:bg-indigo-700 text-white">Add Lesson</Button>
               </DialogTrigger>
               <DialogContent>
