@@ -140,7 +140,9 @@ const HomePage = ({ user }) => (
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
         Welcome to Chalkboard
       </h1>
-      <p className="text-xl mb-8">Your Digital Course Inventory Platform</p>
+      <p className="text-xl mb-8">
+        A peer to peer course-based learning and instruction platform.
+      </p>
       <Link to={user ? "/dashboard" : "/courses"}>
         <Button
           size="lg"
