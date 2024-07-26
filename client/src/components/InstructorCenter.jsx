@@ -1,25 +1,33 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
   CardFooter,
+  CardDescription
 } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, Plus, ChevronRight } from "lucide-react";
+import { Toggle } from "@/components/ui/toggle";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+
 
 const mockInstructorCourses = [
   {
@@ -41,7 +49,56 @@ const mockInstructorCourses = [
       { id: 3, name: "Bob Johnson", email: "bob@example.com" },
     ],
   },
+  {
+    id: 3,
+    title: "Advanced Database Design",
+    description: "Learn advanced database design concepts and best practices.",
+    price: 0,
+    enrolledStudents: [
+      { id: 3, name: "Bob Johnson", email: "bob@example.com" },
+    ],
+  },
 ];
+
+const MockLessons = [
+  {
+    id: 11,
+    title: "Introduction to React",
+    description: "Learn the basics of React and build your first app.",
+    course_id: 1,
+  },
+  {
+    id: 12,
+    title: "React Components",
+    description: "Understand the concept of components and how to create them.",
+    course_id: 1,
+  },
+  {
+    id: 13,
+    title: "State and Props",
+    description: "Learn about state and props in React and how to manage them.",
+    course_id: 1,
+  },
+  {
+    id: 14,
+    title: "React Lifecycle Methods",
+    description: "Explore the lifecycle methods of React components.",
+    course_id: 1,
+  },
+  {
+    id: 15,
+    title: "Handling Events",
+    description: "Learn how to handle events in React.",
+    course_id: 3,
+  },
+  {
+    id: 16,
+    title: "React Hooks",
+    description: "Get introduced to React Hooks and how to use them.",
+    course_id: 2,
+  },
+
+]
 
 const CourseCard = ({ course, onClick }) => (
   <Card
@@ -110,6 +167,10 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             />
           </div>
           <div>
+            <Toggle>Free</Toggle>
+            <Input placeholder='Price' className='w-24' />
+          </div>
+          <div>
             <h3 className="text-lg font-semibold mb-2">Enrolled Students</h3>
             <ScrollArea className="h-[200px] border rounded-md p-4">
               {editedCourse.enrolledStudents.map((student) => (
@@ -137,16 +198,51 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
   );
 };
 
+const Lessons = ({ lessons, course }) => {
+  const filteredLessons = lessons.filter(lesson => lesson.course_id === course.id);
+  return (
+    <div>
+      {filteredLessons.map((lesson, index) => (
+        <Card key={lesson.id}>
+          <CardHeader>
+            <CardTitle>{lesson.title}</CardTitle>
+            <CardDescription>{lesson.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value={`item-${index + 1}`}>
+                <AccordionTrigger>{`Lesson ${index + 1}: ${lesson.title}`}</AccordionTrigger>
+                <AccordionContent>
+                  <Link to='LessonPage'>
+                    <p>{lesson.description}</p>
+                  </Link>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
   const [step, setStep] = useState(1);
   const [newCourse, setNewCourse] = useState({
     title: "",
     description: "",
     content: "",
+    price: 49.99, // Default price, change if necessary
   });
+  const [isFree, setIsFree] = useState(false);
 
   const handleNext = () => setStep(step + 1);
   const handlePrevious = () => setStep(step - 1);
+
+  const handleToggleChange = () => {
+    setIsFree(!isFree);
+    setNewCourse({ ...newCourse, price: isFree ? 0 : 49.99 }); // Adjust 49.99 if needed
+  };
 
   const handleCreate = () => {
     onCreateCourse(newCourse);
@@ -180,6 +276,8 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                   setNewCourse({ ...newCourse, description: e.target.value })
                 }
               />
+              <Toggle>Free</Toggle>
+              <Input placeholder='Price' className='w-24' />
             </div>
             <Button
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -227,6 +325,7 @@ const InstructorCenter = () => {
   const [courses, setCourses] = useState(mockInstructorCourses);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [lessons, setLessons] = useState(MockLessons);
 
   const handleCreateCourse = (newCourse) => {
     const courseWithId = {
@@ -264,14 +363,17 @@ const InstructorCenter = () => {
           <Plus className="mr-2 h-4 w-4" /> Create Course
         </Button>
       </div>
-
       {selectedCourse ? (
-        <CourseDetails
-          course={selectedCourse}
-          onBack={() => setSelectedCourse(null)}
-          onSave={handleSaveCourse}
-          onDelete={handleDeleteCourse}
-        />
+        <>
+          <CourseDetails
+            course={selectedCourse}
+            onBack={() => setSelectedCourse(null)}
+            onSave={handleSaveCourse}
+            onDelete={handleDeleteCourse} />
+          <Lessons
+            lessons={lessons}
+            course={selectedCourse} />
+        </>
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -296,3 +398,4 @@ const InstructorCenter = () => {
 };
 
 export default InstructorCenter;
+
