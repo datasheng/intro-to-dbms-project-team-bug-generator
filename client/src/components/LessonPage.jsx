@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-// 모의 데이터 정의
+
 const mockLessons = [
     {
         id: 1,
@@ -36,12 +36,12 @@ const mockLessons = [
     },
 ];
 
-// LessonPage 컴포넌트 정의
+
 const LessonPage = () => {
     const [lessons, setLessons] = useState(mockLessons);
     const [selectedLesson, setSelectedLesson] = useState(null);
 
-    // 새로운 레슨 생성 핸들러
+
     const handleCreateLesson = () => {
         const newLesson = {
             id: lessons.length + 1,
@@ -53,7 +53,7 @@ const LessonPage = () => {
         setSelectedLesson(newLesson);
     };
 
-    // 레슨 저장 핸들러
+
     const handleSaveLesson = (editedLesson) => {
         setLessons(
             lessons.map((lesson) =>
@@ -63,7 +63,7 @@ const LessonPage = () => {
         setSelectedLesson(null);
     };
 
-    // 레슨 삭제 핸들러
+
     const handleDeleteLesson = (lessonId) => {
         setLessons(lessons.filter((lesson) => lesson.id !== lessonId));
         setSelectedLesson(null);
@@ -101,7 +101,7 @@ const LessonPage = () => {
     );
 };
 
-// LessonCard 컴포넌트 정의
+
 const LessonCard = ({ lesson, isSelected, onClick, onSave, onDelete, onBack }) => {
     const [editedLesson, setEditedLesson] = useState(lesson);
 
