@@ -215,6 +215,7 @@ const CourseDetails = ({
                 </div>
               </div>
             </div>
+            <br></br>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction type="submit">
