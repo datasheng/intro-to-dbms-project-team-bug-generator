@@ -4,7 +4,7 @@ const verifyToken = require("../middlewares/auth");
 
 const router = express.Router();
 
-router.get("/user/courses", verifyToken, (req, res) => {
+router.get("/courses", verifyToken, (req, res) => {
   try {
     db.query(
       `SELECT 

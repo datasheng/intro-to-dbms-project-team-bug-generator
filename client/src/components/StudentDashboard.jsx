@@ -284,7 +284,7 @@ const StudentDashboard = () => {
     if (activeTab === "enrolled-courses" || activeTab === "past-courses") {
       fetchAllCourses();
     } else if (activeTab === "browse") {
-      fetchCourses("/api/courses").then(setBrowseCourses);
+      fetchCourses("/api/courses/all").then(setBrowseCourses);
     }
   }, [activeTab]);
 
@@ -315,7 +315,7 @@ const StudentDashboard = () => {
       setPastCourses(
         allEnrollments.filter((course) => course.enrollment_status !== "active")
       );
-      setBrowseCourses(await fetchCourses("/api/courses"));
+      setBrowseCourses(await fetchCourses("/api/courses/all"));
       setSelectedCourse((prev) => ({
         ...prev,
         enrollment_status: "active",
@@ -349,7 +349,7 @@ const StudentDashboard = () => {
       setPastCourses(
         allEnrollments.filter((course) => course.enrollment_status !== "active")
       );
-      setBrowseCourses(await fetchCourses("/api/courses"));
+      setBrowseCourses(await fetchCourses("/api/courses/all"));
       setSelectedCourse((prev) => ({
         ...prev,
         enrollment_status: "withdrawn",
