@@ -14,6 +14,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,7 +118,7 @@ const CourseCard = ({ course, onClick }) => (
     </CardContent>
     <CardFooter>
       <p className="">
-        {course.course_price > 0 ? `$${course.course_price}` : "Free"}
+        {course.price > 0 ? `$${course.price}` : "Free"}
       </p>
     </CardFooter>
   </Card>
@@ -131,6 +133,15 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
 
   const handleDelete = () => {
     onDelete(editedCourse.id);
+  };
+
+  const handlePriceChange = (e) => {
+    const value = e.target.value;
+    const parsedValue = parseFloat(value);
+    setEditedCourse({
+      ...editedCourse,
+      price: isNaN(parsedValue) ? value : parsedValue,
+    });
   };
 
   return (
@@ -167,8 +178,14 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             />
           </div>
           <div>
-            <Toggle>Free</Toggle>
-            <Input placeholder='Price' className='w-24' />
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              placeholder="Price"
+              className="w-24"
+              value={editedCourse.price}
+              onChange={handlePriceChange}
+            />
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2">Enrolled Students</h3>
@@ -202,27 +219,53 @@ const Lessons = ({ lessons, course }) => {
   const filteredLessons = lessons.filter(lesson => lesson.course_id === course.id);
   return (
     <div>
-      {filteredLessons.map((lesson, index) => (
-        <Card key={lesson.id}>
-          <CardHeader>
-            <CardTitle>{lesson.title}</CardTitle>
-            <CardDescription>{lesson.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Lessons</CardTitle>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="bg-indigo-600 hover:bg-indigo-700 text-white">Add Lesson</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Input lesson name and content here.</DialogTitle>
+                  <br />
+                  <Label>Lesson Title</Label>
+                  <Input placeholder="Lesson Title" />
+                  <Label>Lesson description</Label>
+                  <Textarea placeholder="Lesson Content" />
+                </DialogHeader>
+                <DialogFooter>
+                  <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">Create Lesson</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            {filteredLessons.map((lesson, index) => (
               <AccordionItem value={`item-${index + 1}`}>
                 <AccordionTrigger>{`Lesson ${index + 1}: ${lesson.title}`}</AccordionTrigger>
                 <AccordionContent>
-                  <Link to='LessonPage'>
-                    <p>{lesson.description}</p>
-                  </Link>
+                  <p>{lesson.description}</p>
+                  <br />
+                  <div className="flex items-center space-x-2">
+                    <Link to='LessonPage'>
+                      <p><u>Edit Lesson</u></p>
+                    </Link>
+                    <Button variant="ghost">
+                      <u>Delete Lesson</u>
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+    </div >
   );
 };
 
@@ -234,15 +277,8 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
     content: "",
     price: 49.99, // Default price, change if necessary
   });
-  const [isFree, setIsFree] = useState(false);
-
   const handleNext = () => setStep(step + 1);
   const handlePrevious = () => setStep(step - 1);
-
-  const handleToggleChange = () => {
-    setIsFree(!isFree);
-    setNewCourse({ ...newCourse, price: isFree ? 0 : 49.99 }); // Adjust 49.99 if needed
-  };
 
   const handleCreate = () => {
     onCreateCourse(newCourse);
@@ -276,8 +312,20 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                   setNewCourse({ ...newCourse, description: e.target.value })
                 }
               />
-              <Toggle>Free</Toggle>
-              <Input placeholder='Price' className='w-24' />
+              <Label htmlFor='price'>Price</Label>
+              <Input
+                id='price'
+                value={newCourse.price}
+                onChange={(e) => {
+                  let value = parseFloat(e.target.value);
+                  if (isNaN(value) || value < 0) {
+                    value = 0;
+                  }
+                  setNewCourse({ ...newCourse, price: value });
+                }}
+                placeholder='Price'
+                className='w-24'
+              />
             </div>
             <Button
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
