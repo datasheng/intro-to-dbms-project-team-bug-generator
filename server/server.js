@@ -3,9 +3,9 @@ const cors = require("cors");
 const db = require("./db/config/db.config");
 const createTableQueries = require("./db/models/createTables");
 const authRoutes = require("./routes/auth");
-const verifyToken = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/student");
+const instructorRoutes = require("./routes/instructor");
 
 const app = express();
 const PORT = 3000;
@@ -27,6 +27,7 @@ app.use(
 app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/api", studentRoutes);
+app.use("/api", instructorRoutes);
 
 const createTables = async () => {
   for (const { name, query } of createTableQueries) {
