@@ -290,7 +290,7 @@ const AppContent = () => {
           path="/instructor-center"
           element={<InstructorCenter user={user} />}
         />
-        <Route path="/LessonPage" element={<LessonPage />} />
+        <Route path="/instructor-center/lesson" element={<LessonPage user={user} />} />
         {/* Add more routes as needed */}
       </Routes>
     </div>
