@@ -44,6 +44,7 @@ const queries = [
             CREATE TABLE IF NOT EXISTS Lesson (
                 lesson_id CHAR(36) PRIMARY KEY,
                 course_id CHAR(36),
+                lesson_number INT,
                 lesson_title VARCHAR(255),
                 lesson_description VARCHAR(255),
                 FOREIGN KEY (course_id) REFERENCES Course(course_id)
@@ -60,6 +61,19 @@ const queries = [
                 content_url VARCHAR(255),
                 content_text TEXT,
                 FOREIGN KEY (lesson_id) REFERENCES Lesson(lesson_id)
+            )
+        `,
+  },
+  {
+    name: "Sale",
+    query: `
+            CREATE TABLE IF NOT EXISTS Sale (
+                sale_id CHAR(36) PRIMARY KEY,
+                course_id CHAR(36),
+                student_id CHAR(36),
+                sale_date INT,
+                FOREIGN KEY (course_id) REFERENCES Course(course_id),
+                FOREIGN KEY (student_id) REFERENCES User(user_id)
             )
         `,
   },
