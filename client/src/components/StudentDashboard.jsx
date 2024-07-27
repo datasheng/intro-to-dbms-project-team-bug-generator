@@ -272,7 +272,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     const fetchAllCourses = async () => {
-      const allEnrollments = await fetchCourses("/api/enrollments");
+      const allEnrollments = await fetchCourses("/api/student/enrollments");
       setEnrolledCourses(
         allEnrollments.filter((course) => course.enrollment_status === "active")
       );
@@ -297,18 +297,21 @@ const StudentDashboard = () => {
   const handleEnroll = async (courseId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/enrollments/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ courseId }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_URL}/api/student/enrollments/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ courseId }),
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to enroll");
       }
-      const allEnrollments = await fetchCourses("/api/enrollments");
+      const allEnrollments = await fetchCourses("/api/student/enrollments");
       setEnrolledCourses(
         allEnrollments.filter((course) => course.enrollment_status === "active")
       );
@@ -331,18 +334,21 @@ const StudentDashboard = () => {
   const handleWithdraw = async (enrollmentId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/enrollments/withdraw`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ enrollmentId }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_URL}/api/student/enrollments/withdraw`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ enrollmentId }),
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to withdraw from course");
       }
-      const allEnrollments = await fetchCourses("/api/enrollments");
+      const allEnrollments = await fetchCourses("/api/student/enrollments");
       setEnrolledCourses(
         allEnrollments.filter((course) => course.enrollment_status === "active")
       );

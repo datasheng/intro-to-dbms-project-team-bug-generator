@@ -27,7 +27,7 @@ router.get("/courses/all", (_req, res) => {
   }
 });
 
-router.get("/enrollments", verifyToken, (req, res) => {
+router.get("/student/enrollments", verifyToken, (req, res) => {
   try {
     db.query(
       `SELECT 
@@ -67,7 +67,7 @@ router.get("/enrollments", verifyToken, (req, res) => {
   }
 });
 
-router.post("/enrollments/create", verifyToken, (req, res) => {
+router.post("/student/enrollments/create", verifyToken, (req, res) => {
   try {
     const { courseId } = req.body;
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -116,7 +116,7 @@ router.post("/enrollments/create", verifyToken, (req, res) => {
   }
 });
 
-router.post("/enrollments/withdraw", verifyToken, (req, res) => {
+router.post("/student/enrollments/withdraw", verifyToken, (req, res) => {
   try {
     const { enrollmentId } = req.body;
 
