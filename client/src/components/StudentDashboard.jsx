@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   CreditCard,
   CheckCircle,
+  Lock,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -30,6 +31,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const API_URL = "http://localhost:3000";
 
@@ -73,6 +80,40 @@ const CourseDetails = ({
 }) => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [lessons, setLessons] = useState([]);
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+
+  useEffect(() => {
+    if (enrollmentStatus === "active") {
+      fetchLessons();
+    } else {
+      setLessons([]);
+    }
+  }, [enrollmentStatus, course.course_id]);
+
+  const fetchLessons = async () => {
+    setIsLoadingLessons(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/student/course/lessons?courseId=${course.course_id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch lessons");
+      }
+
+      const lessonsData = await response.json();
+      setLessons(lessonsData);
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+    } finally {
+      setIsLoadingLessons(false);
+    }
+  };
 
   const handleEnrollClick = () => {
     if (course.course_price > 0) {
@@ -186,6 +227,43 @@ const CourseDetails = ({
           )}
         </CardFooter>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Lessons</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {enrollmentStatus === "active" ? (
+            isLoadingLessons ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">Loading lessons...</p>
+              </div>
+            ) : (
+              <Accordion type="single" collapsible className="w-full">
+                {lessons.map((lesson) => (
+                  <AccordionItem
+                    key={lesson.lesson_id}
+                    value={`lesson-${lesson.lesson_id}`}
+                  >
+                    <AccordionTrigger>{`Lesson ${lesson.lesson_number}: ${lesson.lesson_title}`}</AccordionTrigger>
+                    <AccordionContent>
+                      <p>{lesson.lesson_description}</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )
+          ) : (
+            <div className="text-center py-4">
+              <Lock className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-500">
+                Enroll in this course to view lesson content
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <AlertDialog
         open={isPaymentDialogOpen}
         onOpenChange={setIsPaymentDialogOpen}
@@ -215,7 +293,7 @@ const CourseDetails = ({
                 </div>
               </div>
             </div>
-            <br></br>
+            <br />
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction type="submit">

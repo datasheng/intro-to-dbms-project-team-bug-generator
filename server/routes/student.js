@@ -152,4 +152,47 @@ router.post("/student/enrollments/withdraw", verifyToken, (req, res) => {
   }
 });
 
+router.get("/student/course/lessons", verifyToken, (req, res) => {
+  const { courseId } = req.query;
+
+  if (!courseId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Course ID is required" });
+  }
+
+  try {
+    db.query(
+      `SELECT 
+          l.lesson_id,
+          l.lesson_title,
+          l.lesson_description,
+          l.lesson_number
+      FROM 
+          Lesson l
+      JOIN
+          Course c ON l.course_id = c.course_id
+      WHERE 
+          c.course_id = ? AND c.instructor_id = ?
+      ORDER BY
+          l.lesson_number;
+      `,
+      [courseId, req.userId],
+      (err, results) => {
+        if (err) {
+          console.error("Error querying course lessons:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        res.json(results);
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching course lessons:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 module.exports = router;
