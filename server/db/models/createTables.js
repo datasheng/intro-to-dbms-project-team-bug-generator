@@ -44,6 +44,7 @@ const queries = [
             CREATE TABLE IF NOT EXISTS Lesson (
                 lesson_id CHAR(36) PRIMARY KEY,
                 course_id CHAR(36),
+                lesson_number INT,
                 lesson_title VARCHAR(255),
                 lesson_description VARCHAR(255),
                 FOREIGN KEY (course_id) REFERENCES Course(course_id)
