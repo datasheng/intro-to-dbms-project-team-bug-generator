@@ -58,76 +58,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/use-toast";
 
-const mockInstructorCourses = [
-  {
-    id: 1,
-    title: "Introduction to React",
-    description: "Learn the basics of React and build your first app.",
-    price: 49.99,
-    enrolledStudents: [
-      { id: 1, name: "John Doe", email: "john@example.com" },
-      { id: 2, name: "Jane Smith", email: "jane@example.com" },
-    ],
-  },
-  {
-    id: 2,
-    title: "Advanced JavaScript",
-    description: "Dive deep into JavaScript concepts and advanced techniques.",
-    price: 69.99,
-    enrolledStudents: [
-      { id: 3, name: "Bob Johnson", email: "bob@example.com" },
-    ],
-  },
-  {
-    id: 3,
-    title: "Advanced Database Design",
-    description: "Learn advanced database design concepts and best practices.",
-    price: 0,
-    enrolledStudents: [
-      { id: 3, name: "Bob Johnson", email: "bob@example.com" },
-    ],
-  },
-];
-
-const MockLessons = [
-  {
-    id: 11,
-    title: "Introduction to React",
-    description: "Learn the basics of React and build your first app.",
-    course_id: 1,
-  },
-  {
-    id: 12,
-    title: "React Components",
-    description: "Understand the concept of components and how to create them.",
-    course_id: 1,
-  },
-  {
-    id: 13,
-    title: "State and Props",
-    description: "Learn about state and props in React and how to manage them.",
-    course_id: 1,
-  },
-  {
-    id: 14,
-    title: "React Lifecycle Methods",
-    description: "Explore the lifecycle methods of React components.",
-    course_id: 1,
-  },
-  {
-    id: 15,
-    title: "Handling Events",
-    description: "Learn how to handle events in React.",
-    course_id: 3,
-  },
-  {
-    id: 16,
-    title: "React Hooks",
-    description: "Get introduced to React Hooks and how to use them.",
-    course_id: 2,
-  },
-];
+const API_URL = "http://localhost:3000";
 
 const CourseCard = ({ course, onClick }) => (
   <Card
@@ -135,38 +68,94 @@ const CourseCard = ({ course, onClick }) => (
     onClick={() => onClick(course)}
   >
     <CardHeader>
-      <CardTitle>{course.title}</CardTitle>
+      <CardTitle>{course.course_name}</CardTitle>
       <CardDescription>
-        {course.enrolledStudents.length} students enrolled
+        {course.enrolled_students.length} students enrolled
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <p className="text-sm text-gray-500">{course.description}</p>
+      <p className="text-sm text-gray-500">{course.course_description}</p>
     </CardContent>
     <CardFooter>
-      <p className="">{course.price > 0 ? `$${course.price}` : "Free"}</p>
+      <p className="">
+        {course.course_price > 0 ? `$${course.course_price}` : "Free"}
+      </p>
     </CardFooter>
   </Card>
 );
 
-const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
+const CourseDetails = ({ course, onBack, onSave }) => {
   const [editedCourse, setEditedCourse] = useState(course);
+  const [lessons, setLessons] = useState([]);
+  const [isAddLessonDialogOpen, setIsAddLessonDialogOpen] = useState(false);
+
+  useEffect(() => {
+    fetchLessons();
+  }, []);
+
+  const fetchLessons = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lessons?courseId=${course.course_id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch lessons");
+      }
+
+      const lessonsData = await response.json();
+      setLessons(lessonsData);
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+    }
+  };
+
+  const handleAddLesson = async (newLesson) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lessons/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(newLesson),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create lesson");
+      }
+
+      await fetchLessons();
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+    }
+  };
 
   const handleSave = () => {
     onSave(editedCourse);
   };
 
-  const handleDelete = () => {
-    onDelete(editedCourse.id);
-  };
-
   const handlePriceChange = (e) => {
     const value = e.target.value;
-    const parsedValue = parseFloat(value);
-    setEditedCourse({
-      ...editedCourse,
-      price: isNaN(parsedValue) ? value : parsedValue,
-    });
+    if (/^\d*\.?\d*$/.test(value)) {
+      setEditedCourse({
+        ...editedCourse,
+        course_price: value,
+      });
+    }
+  };
+
+  const calculateNetEarnings = (price) => {
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return "0.00";
+    return (numPrice * 0.9).toFixed(2);
   };
 
   return (
@@ -183,9 +172,12 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             <Label htmlFor="title">Course Title</Label>
             <Input
               id="title"
-              value={editedCourse.title}
+              value={editedCourse.course_name}
               onChange={(e) =>
-                setEditedCourse({ ...editedCourse, title: e.target.value })
+                setEditedCourse({
+                  ...editedCourse,
+                  course_name: e.target.value,
+                })
               }
             />
           </div>
@@ -193,31 +185,47 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
             <Label htmlFor="description">Course Description</Label>
             <Textarea
               id="description"
-              value={editedCourse.description}
+              value={editedCourse.course_description}
               onChange={(e) =>
                 setEditedCourse({
                   ...editedCourse,
-                  description: e.target.value,
+                  course_description: e.target.value,
                 })
               }
             />
           </div>
-          <div>
-            <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              placeholder="Price"
-              className="w-24"
-              value={editedCourse.price}
-              onChange={handlePriceChange}
-            />
+          <div className="space-y-2">
+            <div className="flex items-center space-x-4">
+              <div>
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  placeholder="Price"
+                  className="w-24"
+                  value={editedCourse.course_price}
+                  onChange={handlePriceChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="netEarnings">Net Earnings</Label>
+                <Input
+                  id="netEarnings"
+                  className="w-24"
+                  value={calculateNetEarnings(editedCourse.course_price)}
+                  readOnly
+                />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              Chalkboard deducts a 10% seller fee to support our platform.
+            </p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2">Enrolled Students</h3>
             <ScrollArea className="h-[200px] border rounded-md p-4">
-              {editedCourse.enrolledStudents.map((student) => (
-                <div key={student.id} className="mb-2">
-                  <p className="font-medium">{student.name}</p>
+              {editedCourse.enrolled_students.map((student, index) => (
+                <div key={index} className="mb-2">
+                  <p className="font-medium">{student.full_name}</p>
                   <p className="text-sm text-gray-500">{student.email}</p>
                 </div>
               ))}
@@ -233,68 +241,35 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
           </Button>
         </CardFooter>
       </Card>
-    </div>
-  );
-};
 
-const Lessons = ({ lessons, course }) => {
-  const filteredLessons = lessons.filter(
-    (lesson) => lesson.course_id === course.id
-  );
-  return (
-    <div>
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Lessons</CardTitle>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                >
-                  Add Lesson
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Input lesson name and content here.</DialogTitle>
-                  <br />
-                  <Label>Lesson Title</Label>
-                  <Input placeholder="Lesson Title" />
-                  <Label>Lesson description</Label>
-                  <Textarea placeholder="Lesson Content" />
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    Create Lesson
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold">Lessons</CardTitle>
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={() => setIsAddLessonDialogOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Lesson
+          </Button>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
-            {filteredLessons.map((lesson, index) => (
-              <AccordionItem value={`item-${index + 1}`}>
-                <AccordionTrigger>{`Lesson ${index + 1}: ${
-                  lesson.title
-                }`}</AccordionTrigger>
+            {lessons.map((lesson) => (
+              <AccordionItem
+                key={lesson.lesson_id}
+                value={`lesson-${lesson.lesson_id}`}
+              >
+                <AccordionTrigger>{`Lesson ${lesson.lesson_number}: ${lesson.lesson_title}`}</AccordionTrigger>
                 <AccordionContent>
-                  <p>{lesson.description}</p>
-                  <br />
-                  <div className="flex items-center space-x-2">
-                    <Link to="LessonPage">
-                      <p>
-                        <u>Edit Lesson</u>
-                      </p>
-                    </Link>
-                    <Button variant="ghost">
-                      <u>Delete Lesson</u>
+                  <p>{lesson.lesson_description}</p>
+                  <div className="mt-4 flex space-x-2">
+                    <Button variant="outline">Edit Lesson</Button>
+                    <Button variant="outline">Manage Content</Button>
+                    <Button
+                      variant="outline"
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete Lesson
                     </Button>
                   </div>
                 </AccordionContent>
@@ -303,7 +278,90 @@ const Lessons = ({ lessons, course }) => {
           </Accordion>
         </CardContent>
       </Card>
+      <AddLessonDialog
+        isOpen={isAddLessonDialogOpen}
+        onClose={() => setIsAddLessonDialogOpen(false)}
+        onAddLesson={handleAddLesson}
+        courseId={course.course_id}
+      />
     </div>
+  );
+};
+
+const AddLessonDialog = ({ isOpen, onClose, onAddLesson, courseId }) => {
+  const [newLesson, setNewLesson] = useState({
+    lesson_number: "",
+    lesson_title: "",
+    lesson_description: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewLesson({ ...newLesson, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await onAddLesson({ ...newLesson, courseId });
+    setNewLesson({
+      lesson_number: "",
+      lesson_title: "",
+      lesson_description: "",
+    });
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Lesson</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="lesson_number">Lesson Number</Label>
+              <Input
+                id="lesson_number"
+                name="lesson_number"
+                type="number"
+                value={newLesson.lesson_number}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lesson_title">Lesson Title</Label>
+              <Input
+                id="lesson_title"
+                name="lesson_title"
+                value={newLesson.lesson_title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lesson_description">Lesson Description</Label>
+              <Textarea
+                id="lesson_description"
+                name="lesson_description"
+                value={newLesson.lesson_description}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              Add Lesson
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -313,14 +371,44 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
     title: "",
     description: "",
     content: "",
-    price: 0,
+    price: "",
   });
+
+  const resetModal = () => {
+    setStep(1);
+    setNewCourse({
+      title: "",
+      description: "",
+      content: "",
+      price: "",
+    });
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetModal();
+    }
+  }, [isOpen]);
+
   const handleNext = () => setStep(step + 1);
   const handlePrevious = () => setStep(step - 1);
 
-  const handleCreate = () => {
-    onCreateCourse(newCourse);
+  const handleCreate = async () => {
+    await onCreateCourse(newCourse);
     onClose();
+  };
+
+  const handlePriceChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*\.?\d*$/.test(value)) {
+      setNewCourse({ ...newCourse, price: value });
+    }
+  };
+
+  const calculateNetEarnings = (price) => {
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return "0.00";
+    return (numPrice * 0.9).toFixed(2);
   };
 
   return (
@@ -350,20 +438,32 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                   setNewCourse({ ...newCourse, description: e.target.value })
                 }
               />
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                value={newCourse.price}
-                onChange={(e) => {
-                  let value = parseFloat(e.target.value);
-                  if (isNaN(value) || value < 0) {
-                    value = 0;
-                  }
-                  setNewCourse({ ...newCourse, price: value });
-                }}
-                placeholder="Price"
-                className="w-24"
-              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-4">
+                <div>
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    placeholder="Price"
+                    className="w-24"
+                    value={newCourse.price}
+                    onChange={handlePriceChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="netEarnings">Net Earnings</Label>
+                  <Input
+                    id="netEarnings"
+                    className="w-24"
+                    value={calculateNetEarnings(newCourse.price)}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">
+                Chalkboard deducts a 10% seller fee to support our platform.
+              </p>
             </div>
             <Button
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -408,15 +508,15 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
 };
 
 const InstructorCenter = () => {
-  const [courses, setCourses] = useState(mockInstructorCourses);
+  const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [lessons, setLessons] = useState(MockLessons);
   const [activeTab, setActiveTab] = useState("courses");
   const [earningsData, setEarningsData] = useState([]);
   const [earningsTimeframe, setEarningsTimeframe] = useState("1m");
 
   useEffect(() => {
+    fetchCourses();
     if (activeTab === "earnings") {
       fetchEarningsData();
     }
@@ -424,12 +524,9 @@ const InstructorCenter = () => {
 
   const fetchEarningsData = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/instructor/earnings",
-        {
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${API_URL}/api/instructor/earnings`, {
+        credentials: "include",
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch earnings data");
       }
@@ -652,56 +749,139 @@ const InstructorCenter = () => {
     </div>
   );
 
-  const handleCreateCourse = (newCourse) => {
-    const courseWithId = {
-      ...newCourse,
-      id: courses.length + 1,
-      enrolledStudents: [],
-    };
-    setCourses([...courses, courseWithId]);
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/instructor/courses`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch courses");
+      }
+      const coursesData = await response.json();
+
+      const coursesWithEnrollments = await Promise.all(
+        coursesData.map(async (course) => {
+          const enrollmentsResponse = await fetch(
+            `${API_URL}/api/instructor/course/enrollments?courseId=${course.course_id}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
+
+          if (!enrollmentsResponse.ok) {
+            throw new Error(
+              `Failed to fetch enrollments for course ${course.course_id}`
+            );
+          }
+
+          const enrollmentsData = await enrollmentsResponse.json();
+          return { ...course, enrolled_students: enrollmentsData };
+        })
+      );
+
+      setCourses(coursesWithEnrollments);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
   };
 
-  const handleSaveCourse = (editedCourse) => {
-    setCourses(
-      courses.map((course) =>
-        course.id === editedCourse.id ? editedCourse : course
-      )
-    );
-    setSelectedCourse(null);
+  const handleCreateCourse = async (newCourse) => {
+    try {
+      const response = await fetch(`${API_URL}/api/instructor/courses/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          course_name: newCourse.title,
+          course_description: newCourse.description,
+          course_details: newCourse.content,
+          course_price: parseFloat(newCourse.price),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create course");
+      }
+
+      await fetchCourses();
+    } catch (error) {
+      console.error("Error creating course:", error);
+    }
   };
 
-  const handleDeleteCourse = (courseId) => {
-    setCourses(courses.filter((course) => course.id !== courseId));
-    setSelectedCourse(null);
+  const handleSaveCourse = async (editedCourse) => {
+    try {
+      const response = await fetch(`${API_URL}/api/instructor/courses/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          course_id: editedCourse.course_id,
+          course_name: editedCourse.course_name,
+          course_description: editedCourse.course_description,
+          course_details: editedCourse.course_details,
+          course_price: parseFloat(editedCourse.course_price),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update course");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Course updated successfully",
+        });
+        await fetchCourses();
+        setSelectedCourse(null);
+      } else {
+        throw new Error(result.message || "Failed to update course");
+      }
+    } catch (error) {
+      console.error("Error updating course:", error);
+      toast({
+        title: "Error",
+        description:
+          error.message || "An error occurred while updating the course",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderCoursesTab = () => (
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Courses</h2>
-        <Button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" /> Create Course
-        </Button>
+        {!selectedCourse && (
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Create Course
+          </Button>
+        )}
       </div>
       {selectedCourse ? (
-        <>
-          <CourseDetails
-            course={selectedCourse}
-            onBack={() => setSelectedCourse(null)}
-            onSave={handleSaveCourse}
-            onDelete={handleDeleteCourse}
-          />
-          <Lessons lessons={lessons} course={selectedCourse} />
-        </>
+        <CourseDetails
+          course={selectedCourse}
+          onBack={() => setSelectedCourse(null)}
+          onSave={handleSaveCourse}
+        />
       ) : (
         <ScrollArea className="h-[calc(100vh-300px)]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {courses.map((course) => (
               <CourseCard
-                key={course.id}
+                key={course.course_id}
                 course={course}
                 onClick={setSelectedCourse}
               />
