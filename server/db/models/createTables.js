@@ -71,7 +71,6 @@ const queries = [
                 sale_id CHAR(36) PRIMARY KEY,
                 course_id CHAR(36),
                 student_id CHAR(36),
-                sale_date INT,
                 FOREIGN KEY (course_id) REFERENCES Course(course_id),
                 FOREIGN KEY (student_id) REFERENCES User(user_id)
             )
