@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-  CardDescription
+  CardDescription,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,8 +28,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-
+} from "@/components/ui/accordion";
 
 const mockInstructorCourses = [
   {
@@ -99,8 +98,7 @@ const MockLessons = [
     description: "Get introduced to React Hooks and how to use them.",
     course_id: 2,
   },
-
-]
+];
 
 const CourseCard = ({ course, onClick }) => (
   <Card
@@ -117,9 +115,7 @@ const CourseCard = ({ course, onClick }) => (
       <p className="text-sm text-gray-500">{course.description}</p>
     </CardContent>
     <CardFooter>
-      <p className="">
-        {course.price > 0 ? `$${course.price}` : "Free"}
-      </p>
+      <p className="">{course.price > 0 ? `$${course.price}` : "Free"}</p>
     </CardFooter>
   </Card>
 );
@@ -200,9 +196,6 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button onClick={handleDelete} className="bg-red-500 text-white">
-            Delete Course
-          </Button>
           <Button
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
             onClick={handleSave}
@@ -216,7 +209,9 @@ const CourseDetails = ({ course, onBack, onSave, onDelete }) => {
 };
 
 const Lessons = ({ lessons, course }) => {
-  const filteredLessons = lessons.filter(lesson => lesson.course_id === course.id);
+  const filteredLessons = lessons.filter(
+    (lesson) => lesson.course_id === course.id
+  );
   return (
     <div>
       <Card>
@@ -225,7 +220,12 @@ const Lessons = ({ lessons, course }) => {
             <CardTitle>Lessons</CardTitle>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="bg-indigo-600 hover:bg-indigo-700 text-white">Add Lesson</Button>
+                <Button
+                  variant="outline"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  Add Lesson
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -237,7 +237,12 @@ const Lessons = ({ lessons, course }) => {
                   <Textarea placeholder="Lesson Content" />
                 </DialogHeader>
                 <DialogFooter>
-                  <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">Create Lesson</Button>
+                  <Button
+                    type="submit"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    Create Lesson
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -247,13 +252,17 @@ const Lessons = ({ lessons, course }) => {
           <Accordion type="single" collapsible className="w-full">
             {filteredLessons.map((lesson, index) => (
               <AccordionItem value={`item-${index + 1}`}>
-                <AccordionTrigger>{`Lesson ${index + 1}: ${lesson.title}`}</AccordionTrigger>
+                <AccordionTrigger>{`Lesson ${index + 1}: ${
+                  lesson.title
+                }`}</AccordionTrigger>
                 <AccordionContent>
                   <p>{lesson.description}</p>
                   <br />
                   <div className="flex items-center space-x-2">
-                    <Link to='LessonPage'>
-                      <p><u>Edit Lesson</u></p>
+                    <Link to="LessonPage">
+                      <p>
+                        <u>Edit Lesson</u>
+                      </p>
                     </Link>
                     <Button variant="ghost">
                       <u>Delete Lesson</u>
@@ -265,7 +274,7 @@ const Lessons = ({ lessons, course }) => {
           </Accordion>
         </CardContent>
       </Card>
-    </div >
+    </div>
   );
 };
 
@@ -312,9 +321,9 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                   setNewCourse({ ...newCourse, description: e.target.value })
                 }
               />
-              <Label htmlFor='price'>Price</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
-                id='price'
+                id="price"
                 value={newCourse.price}
                 onChange={(e) => {
                   let value = parseFloat(e.target.value);
@@ -323,8 +332,8 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                   }
                   setNewCourse({ ...newCourse, price: value });
                 }}
-                placeholder='Price'
-                className='w-24'
+                placeholder="Price"
+                className="w-24"
               />
             </div>
             <Button
@@ -417,10 +426,9 @@ const InstructorCenter = () => {
             course={selectedCourse}
             onBack={() => setSelectedCourse(null)}
             onSave={handleSaveCourse}
-            onDelete={handleDeleteCourse} />
-          <Lessons
-            lessons={lessons}
-            course={selectedCourse} />
+            onDelete={handleDeleteCourse}
+          />
+          <Lessons lessons={lessons} course={selectedCourse} />
         </>
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]">
@@ -446,4 +454,3 @@ const InstructorCenter = () => {
 };
 
 export default InstructorCenter;
-
