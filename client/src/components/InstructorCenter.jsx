@@ -58,7 +58,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "@/components/ui/use-toast";
 
 const API_URL = "http://localhost:3000";
 
@@ -837,10 +836,6 @@ const InstructorCenter = () => {
       const result = await response.json();
 
       if (result.success) {
-        toast({
-          title: "Success",
-          description: "Course updated successfully",
-        });
         await fetchCourses();
         setSelectedCourse(null);
       } else {
@@ -848,12 +843,6 @@ const InstructorCenter = () => {
       }
     } catch (error) {
       console.error("Error updating course:", error);
-      toast({
-        title: "Error",
-        description:
-          error.message || "An error occurred while updating the course",
-        variant: "destructive",
-      });
     }
   };
 
