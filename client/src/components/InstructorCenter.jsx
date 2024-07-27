@@ -14,8 +14,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +87,10 @@ const CourseDetails = ({ course, onBack, onSave }) => {
   const [editedCourse, setEditedCourse] = useState(course);
   const [lessons, setLessons] = useState([]);
   const [isAddLessonDialogOpen, setIsAddLessonDialogOpen] = useState(false);
+  const [isEditLessonDialogOpen, setIsEditLessonDialogOpen] = useState(false);
+  const [isDeleteLessonDialogOpen, setIsDeleteLessonDialogOpen] =
+    useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   useEffect(() => {
     fetchLessons();
@@ -137,8 +141,70 @@ const CourseDetails = ({ course, onBack, onSave }) => {
     }
   };
 
+  const handleEditLesson = (lesson) => {
+    setSelectedLesson(lesson);
+    setIsEditLessonDialogOpen(true);
+  };
+
+  const handleSaveLesson = async (editedLesson) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lessons/update`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            lesson_id: editedLesson.lesson_id,
+            course_id: editedLesson.course_id,
+            lesson_number: editedLesson.lesson_number,
+            lesson_title: editedLesson.lesson_title,
+            lesson_description: editedLesson.lesson_description,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update lesson");
+      }
+
+      await fetchLessons();
+    } catch (error) {
+      console.error("Error updating lesson:", error);
+    }
+  };
+
   const handleSave = () => {
     onSave(editedCourse);
+  };
+
+  const handleDeleteLesson = async (lessonToDelete) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lessons/delete`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            lesson_id: lessonToDelete.lesson_id,
+            course_id: course.course_id,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete lesson");
+      }
+
+      await fetchLessons();
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+    }
   };
 
   const handlePriceChange = (e) => {
@@ -262,11 +328,20 @@ const CourseDetails = ({ course, onBack, onSave }) => {
                 <AccordionContent>
                   <p>{lesson.lesson_description}</p>
                   <div className="mt-4 flex space-x-2">
-                    <Button variant="outline">Edit Lesson</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleEditLesson(lesson)}
+                    >
+                      Edit Lesson
+                    </Button>
                     <Button variant="outline">Manage Content</Button>
                     <Button
                       variant="outline"
                       className="text-red-500 hover:text-red-700"
+                      onClick={() => {
+                        setSelectedLesson(lesson);
+                        setIsDeleteLessonDialogOpen(true);
+                      }}
                     >
                       Delete Lesson
                     </Button>
@@ -282,6 +357,25 @@ const CourseDetails = ({ course, onBack, onSave }) => {
         onClose={() => setIsAddLessonDialogOpen(false)}
         onAddLesson={handleAddLesson}
         courseId={course.course_id}
+      />
+      <EditLessonDialog
+        isOpen={isEditLessonDialogOpen}
+        onClose={() => {
+          setIsEditLessonDialogOpen(false);
+          setSelectedLesson(null);
+        }}
+        onSaveLesson={handleSaveLesson}
+        lesson={selectedLesson}
+        courseId={course.course_id}
+      />
+      <DeleteLessonDialog
+        isOpen={isDeleteLessonDialogOpen}
+        onClose={() => {
+          setIsDeleteLessonDialogOpen(false);
+          setSelectedLesson(null);
+        }}
+        onDeleteLesson={handleDeleteLesson}
+        lesson={selectedLesson}
       />
     </div>
   );
@@ -359,6 +453,135 @@ const AddLessonDialog = ({ isOpen, onClose, onAddLesson, courseId }) => {
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const EditLessonDialog = ({
+  isOpen,
+  onClose,
+  onSaveLesson,
+  lesson,
+  courseId,
+}) => {
+  const [editedLesson, setEditedLesson] = useState({
+    lesson_number: "",
+    lesson_title: "",
+    lesson_description: "",
+    course_id: "",
+  });
+
+  useEffect(() => {
+    if (lesson) {
+      setEditedLesson({
+        lesson_number: lesson.lesson_number || "",
+        lesson_title: lesson.lesson_title || "",
+        lesson_description: lesson.lesson_description || "",
+        lesson_id: lesson.lesson_id,
+        course_id: courseId,
+      });
+    }
+  }, [lesson, courseId]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedLesson((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (lesson && lesson.lesson_id) {
+      await onSaveLesson(editedLesson);
+      onClose();
+    }
+  };
+
+  if (!lesson) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Lesson</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="lesson_number">Lesson Number</Label>
+              <Input
+                id="lesson_number"
+                name="lesson_number"
+                type="number"
+                value={editedLesson.lesson_number}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lesson_title">Lesson Title</Label>
+              <Input
+                id="lesson_title"
+                name="lesson_title"
+                value={editedLesson.lesson_title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lesson_description">Lesson Description</Label>
+              <Textarea
+                id="lesson_description"
+                name="lesson_description"
+                value={editedLesson.lesson_description}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const DeleteLessonDialog = ({ isOpen, onClose, onDeleteLesson, lesson }) => {
+  if (!lesson) return null;
+
+  const handleDelete = async () => {
+    await onDeleteLesson(lesson);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Lesson</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Are you sure you want to delete the lesson "{lesson.lesson_title}"?
+          This action cannot be undone.
+        </DialogDescription>
+        <DialogFooter className="mt-4">
+          <Button onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Delete
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -672,7 +895,11 @@ const InstructorCenter = () => {
                     : "outline"
                 }
                 onClick={() => setEarningsTimeframe(timeframe.toLowerCase())}
-                className="h-8 px-3 text-xs"
+                className={`h-8 px-3 text-xs ${
+                  earningsTimeframe.toUpperCase() === timeframe
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                    : ""
+                }`}
               >
                 {timeframe}
               </Button>

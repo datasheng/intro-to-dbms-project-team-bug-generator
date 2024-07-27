@@ -296,7 +296,10 @@ const CourseDetails = ({
             <br />
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction type="submit">
+              <AlertDialogAction
+                type="submit"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
                 Submit Payment
               </AlertDialogAction>
             </AlertDialogFooter>

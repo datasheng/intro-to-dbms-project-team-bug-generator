@@ -169,6 +169,94 @@ router.get("/instructor/course/lessons", verifyToken, (req, res) => {
   }
 });
 
+router.post("/instructor/course/lessons/update", verifyToken, (req, res) => {
+  const {
+    course_id,
+    lesson_title,
+    lesson_description,
+    lesson_number,
+    lesson_id,
+  } = req.body;
+
+  try {
+    db.query(
+      `UPDATE Lesson l
+       JOIN Course c ON l.course_id = c.course_id
+       SET l.lesson_title = ?, l.lesson_description = ?, l.lesson_number = ?
+       WHERE l.lesson_id = ? AND l.course_id = ? AND c.instructor_id = ?`,
+      [
+        lesson_title,
+        lesson_description,
+        lesson_number,
+        lesson_id,
+        course_id,
+        req.userId,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating lesson:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            success: false,
+            message:
+              "Lesson not found or you don't have permission to update it",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "Lesson updated successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error updating lesson:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.post("/instructor/course/lessons/delete", verifyToken, (req, res) => {
+  const { course_id, lesson_id } = req.body;
+
+  try {
+    db.query(
+      `DELETE l FROM Lesson l
+       JOIN Course c ON l.course_id = c.course_id
+       WHERE l.lesson_id = ? AND l.course_id = ? AND c.instructor_id = ?`,
+      [lesson_id, course_id, req.userId],
+      (err, result) => {
+        if (err) {
+          console.error("Error deleting lesson:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            success: false,
+            message:
+              "Lesson not found or you don't have permission to delete it",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "Lesson deleted successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error deleting lesson:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 router.post("/instructor/course/lessons/create", verifyToken, (req, res) => {
   const { courseId, lesson_title, lesson_description, lesson_number } =
     req.body;
