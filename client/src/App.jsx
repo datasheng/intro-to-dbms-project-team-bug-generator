@@ -42,6 +42,7 @@ import {
 import CourseExplorer from "./components/CourseExplorer";
 import LessonPage from "./components/LessonPage";
 import Metrics from "./components/Metrics";
+import Contents from "./components/Contents";
 
 const Navbar = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -296,6 +297,10 @@ const AppContent = () => {
           element={<LessonPage user={user} />}
         />
         <Route path="/metrics" element={<Metrics />} />
+        <Route
+          path="/Contents"
+          element={<Contents user={user} />}
+        />
       </Routes>
     </div>
   );
