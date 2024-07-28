@@ -213,13 +213,17 @@ const CourseDetails = ({
                     Are you sure you want to unenroll?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. You may lose access to course
-                    materials and progress. You will not be refunded amd will have to pay for the course again if you wish to reenroll.
+                    This action cannot be undone. You will lose access to course
+                    materials and progress. You will not be refunded and will
+                    have to pay for the course again if you wish to re-enroll.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onWithdraw(enrollmentId)}>
+                  <AlertDialogAction
+                    onClick={() => onWithdraw(enrollmentId)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
                     Confirm Unenroll
                   </AlertDialogAction>
                 </AlertDialogFooter>

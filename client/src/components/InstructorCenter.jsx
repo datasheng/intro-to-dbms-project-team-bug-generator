@@ -282,7 +282,7 @@ const CourseDetails = ({ course, onBack, onSave }) => {
               </div>
             </div>
             <p className="text-sm text-gray-500">
-              Chalkboard deducts a 10% seller fee to support our platform. Don't let that stop you from teaching!
+              Chalkboard deducts a 10% seller fee to support our platform.
             </p>
           </div>
           <div>
@@ -684,7 +684,7 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
                 </div>
               </div>
               <p className="text-sm text-gray-500">
-                Chalkboard deducts a 10% seller fee to support our platform. Don't let that stop you from teaching!
+                Chalkboard deducts a 10% seller fee to support our platform.
               </p>
             </div>
             <Button

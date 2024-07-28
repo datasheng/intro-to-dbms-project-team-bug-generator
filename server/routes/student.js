@@ -221,4 +221,41 @@ router.get("/student/course/lessons", verifyToken, (req, res) => {
   }
 });
 
+router.get("/student/course/lesson/contents", verifyToken, (req, res) => {
+  const { lessonId } = req.query;
+
+  if (!lessonId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Lesson ID is required" });
+  }
+
+  try {
+    db.query(
+      `
+      SELECT 
+          *
+      FROM 
+          Content
+      WHERE 
+          lesson_id = ?
+      `,
+      [lessonId],
+      (err, results) => {
+        if (err) {
+          console.error("Error querying lesson contents:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        res.json(results);
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching lesson contents:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 module.exports = router;

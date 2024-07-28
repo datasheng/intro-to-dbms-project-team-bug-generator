@@ -297,10 +297,6 @@ const AppContent = () => {
           element={<LessonPage user={user} />}
         />
         <Route path="/metrics" element={<Metrics />} />
-        <Route
-          path="/Contents"
-          element={<Contents user={user} />}
-        />
       </Routes>
     </div>
   );
