@@ -73,39 +73,65 @@ router.post("/student/enrollments/create", verifyToken, (req, res) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
     db.query(
-      `SELECT * FROM Enrollment WHERE course_id = ? AND student_id = ? AND enrollment_status = 'active'`,
-      [courseId, req.userId],
-      (checkErr, checkResults) => {
-        if (checkErr) {
-          console.error("Error checking existing enrollment:", checkErr);
+      `SELECT instructor_id FROM Course WHERE course_id = ?`,
+      [courseId],
+      (instructorErr, instructorResults) => {
+        if (instructorErr) {
+          console.error("Error checking course instructor:", instructorErr);
           return res
             .status(500)
             .send({ success: false, message: "Internal Server Error" });
         }
 
-        if (checkResults.length > 0) {
+        if (instructorResults.length === 0) {
+          return res
+            .status(404)
+            .json({ success: false, message: "Course not found" });
+        }
+
+        if (instructorResults[0].instructor_id === req.userId) {
           return res.status(400).json({
             success: false,
-            message: "You are already enrolled in this course",
+            message: "Instructors cannot enroll in their own courses",
           });
         }
 
         db.query(
-          `INSERT INTO Enrollment (enrollment_id, course_id, student_id, enrollment_status, enrollment_date)
-           VALUES (UUID(), ?, ?, 'active', ?);`,
-          [courseId, req.userId, currentTimestamp],
-          (err) => {
-            if (err) {
-              console.error("Error creating enrollment:", err);
+          `SELECT * FROM Enrollment WHERE course_id = ? AND student_id = ? AND enrollment_status = 'active'`,
+          [courseId, req.userId],
+          (checkErr, checkResults) => {
+            if (checkErr) {
+              console.error("Error checking existing enrollment:", checkErr);
               return res
                 .status(500)
                 .send({ success: false, message: "Internal Server Error" });
             }
 
-            res.json({
-              success: true,
-              message: "Enrollment created successfully",
-            });
+            if (checkResults.length > 0) {
+              return res.status(400).json({
+                success: false,
+                message: "You are already enrolled in this course",
+              });
+            }
+
+            db.query(
+              `INSERT INTO Enrollment (enrollment_id, course_id, student_id, enrollment_status, enrollment_date)
+               VALUES (UUID(), ?, ?, 'active', ?);`,
+              [courseId, req.userId, currentTimestamp],
+              (err) => {
+                if (err) {
+                  console.error("Error creating enrollment:", err);
+                  return res
+                    .status(500)
+                    .send({ success: false, message: "Internal Server Error" });
+                }
+
+                res.json({
+                  success: true,
+                  message: "Enrollment created successfully",
+                });
+              }
+            );
           }
         );
       }
