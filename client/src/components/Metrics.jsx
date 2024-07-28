@@ -121,7 +121,7 @@ const Metrics = () => {
         className="bg-indigo-600 hover:bg-indigo-700 text-white"
       >
         <FileSpreadsheet className="mr-2 h-4 w-4" />
-        Export Full Metrics CSV
+        Export Full Sales CSV
       </Button>
     </div>
   );
