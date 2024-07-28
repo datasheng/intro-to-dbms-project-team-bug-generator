@@ -199,11 +199,11 @@ router.get("/student/course/lessons", verifyToken, (req, res) => {
       JOIN
           Course c ON l.course_id = c.course_id
       WHERE 
-          c.course_id = ? AND c.instructor_id = ?
+          c.course_id = ?
       ORDER BY
           l.lesson_number;
       `,
-      [courseId, req.userId],
+      [courseId],
       (err, results) => {
         if (err) {
           console.error("Error querying course lessons:", err);

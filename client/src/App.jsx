@@ -40,9 +40,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import CourseExplorer from "./components/CourseExplorer";
-import LessonPage from "./components/LessonPage";
 import Metrics from "./components/Metrics";
-import Contents from "./components/Contents";
 
 const Navbar = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -291,10 +289,6 @@ const AppContent = () => {
         <Route
           path="/instructor-center"
           element={<InstructorCenter user={user} />}
-        />
-        <Route
-          path="/instructor-center/lesson"
-          element={<LessonPage user={user} />}
         />
         <Route path="/metrics" element={<Metrics />} />
       </Routes>

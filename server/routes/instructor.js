@@ -300,6 +300,216 @@ router.post("/instructor/course/lessons/create", verifyToken, (req, res) => {
   }
 });
 
+router.get("/instructor/course/lesson/contents", verifyToken, (req, res) => {
+  const { lessonId } = req.query;
+
+  if (!lessonId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Lesson ID is required" });
+  }
+
+  try {
+    db.query(
+      `
+      SELECT 
+          *
+      FROM 
+          Content
+      WHERE 
+          lesson_id = ?
+      `,
+      [lessonId],
+      (err, results) => {
+        if (err) {
+          console.error("Error querying lesson contents:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        res.json(results);
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching lesson contents:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.post(
+  "/instructor/course/lesson/content/create",
+  verifyToken,
+  (req, res) => {
+    const { lesson_id, content_type, content_url, content_text } = req.body;
+
+    if (!lesson_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Lesson ID is required" });
+    }
+
+    if (!content_type) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content type is required" });
+    }
+
+    if (content_type !== "text" && !content_url) {
+      return res.status(400).json({
+        success: false,
+        message: "Content URL is required for non-text content",
+      });
+    }
+
+    if (!content_text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content text is required" });
+    }
+
+    try {
+      db.query(
+        `INSERT INTO Content (content_id, lesson_id, content_type, content_url, content_text)
+         VALUES (UUID(), ?, ?, ?, ?)`,
+        [lesson_id, content_type, content_url, content_text],
+        (err, result) => {
+          if (err) {
+            console.error("Error creating new content:", err);
+            return res
+              .status(500)
+              .json({ success: false, message: "Internal Server Error" });
+          }
+
+          res.status(201).json({
+            success: true,
+            message: "Content created successfully",
+            contentId: result.insertId,
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error creating new content:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
+  }
+);
+
+router.post(
+  "/instructor/course/lesson/content/update",
+  verifyToken,
+  (req, res) => {
+    const { content_id, content_type, content_url, content_text } = req.body;
+
+    if (!content_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content ID is required" });
+    }
+
+    if (!content_type) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content type is required" });
+    }
+
+    if (content_type !== "text" && !content_url) {
+      return res.status(400).json({
+        success: false,
+        message: "Content URL is required for non-text content",
+      });
+    }
+
+    if (!content_text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content text is required" });
+    }
+
+    try {
+      db.query(
+        `UPDATE Content 
+         SET content_type = ?, content_url = ?, content_text = ?
+         WHERE content_id = ?`,
+        [content_type, content_url, content_text, content_id],
+        (err, result) => {
+          if (err) {
+            console.error("Error updating content:", err);
+            return res
+              .status(500)
+              .json({ success: false, message: "Internal Server Error" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({
+              success: false,
+              message: "Content not found",
+            });
+          }
+
+          res.status(200).json({
+            success: true,
+            message: "Content updated successfully",
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error updating content:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
+  }
+);
+
+router.post(
+  "/instructor/course/lesson/content/delete",
+  verifyToken,
+  (req, res) => {
+    const { content_id } = req.body;
+
+    if (!content_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Content ID is required" });
+    }
+
+    try {
+      db.query(
+        `DELETE FROM Content WHERE content_id = ?`,
+        [content_id],
+        (err, result) => {
+          if (err) {
+            console.error("Error deleting content:", err);
+            return res
+              .status(500)
+              .json({ success: false, message: "Internal Server Error" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({
+              success: false,
+              message: "Content not found",
+            });
+          }
+
+          res.status(200).json({
+            success: true,
+            message: "Content deleted successfully",
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error deleting content:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
+  }
+);
+
 router.get("/instructor/course/enrollments", verifyToken, (req, res) => {
   const { courseId } = req.query;
 

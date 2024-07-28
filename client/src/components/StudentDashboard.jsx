@@ -38,6 +38,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import LessonContentView from "./LessonContentView";
 
 const API_URL = "http://localhost:3000";
 
@@ -83,6 +84,7 @@ const CourseDetails = ({
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   useEffect(() => {
     if (enrollmentStatus === "active") {
@@ -133,6 +135,19 @@ const CourseDetails = ({
       onEnroll(course.course_id);
     }, 2000);
   };
+
+  const handleOpenLesson = (lesson) => {
+    setSelectedLesson(lesson);
+  };
+
+  if (selectedLesson) {
+    return (
+      <LessonContentView
+        lesson={selectedLesson}
+        onBack={() => setSelectedLesson(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -255,9 +270,7 @@ const CourseDetails = ({
                       <p>{lesson.lesson_description}</p>
                       <Button
                         className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
-                        onClick={() => {
-                          console.log(`Opening lesson ${lesson.lesson_number}`);
-                        }}
+                        onClick={() => handleOpenLesson(lesson)}
                       >
                         Open Lesson <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>

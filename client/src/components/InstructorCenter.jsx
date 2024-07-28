@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -91,6 +90,7 @@ const CourseDetails = ({ course, onBack, onSave }) => {
   const [isDeleteLessonDialogOpen, setIsDeleteLessonDialogOpen] =
     useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [isManagingContent, setIsManagingContent] = useState(false);
 
   useEffect(() => {
     fetchLessons();
@@ -223,6 +223,23 @@ const CourseDetails = ({ course, onBack, onSave }) => {
     return (numPrice * 0.9).toFixed(2);
   };
 
+  const handleManageContent = (lesson) => {
+    setSelectedLesson(lesson);
+    setIsManagingContent(true);
+  };
+
+  if (isManagingContent) {
+    return (
+      <ContentManagement
+        lesson={selectedLesson}
+        onBack={() => {
+          setIsManagingContent(false);
+          setSelectedLesson(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Button onClick={onBack} variant="ghost">
@@ -334,7 +351,12 @@ const CourseDetails = ({ course, onBack, onSave }) => {
                     >
                       Edit Details
                     </Button>
-                    <Button variant="outline">Manage Content</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleManageContent(lesson)}
+                    >
+                      Manage Content
+                    </Button>
                     <Button
                       variant="outline"
                       className="text-red-500 hover:text-red-700"
@@ -726,6 +748,368 @@ const CreateCourseModal = ({ isOpen, onClose, onCreateCourse }) => {
         )}
       </DialogContent>
     </Dialog>
+  );
+};
+
+const ContentCard = ({
+  content,
+  isSelected,
+  onClick,
+  onSave,
+  onDelete,
+  onBack,
+}) => {
+  const [editedContent, setEditedContent] = useState(content);
+
+  const handleSave = () => {
+    onSave(editedContent);
+  };
+
+  return (
+    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+      <Card className="w-full">
+        <CardHeader
+          onClick={onClick}
+          className="cursor-pointer bg-indigo-600 text-white p-4 hover:bg-indigo-700"
+        >
+          <CardTitle>{editedContent.content_type.toUpperCase()}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          {content.content_type === "video" && (
+            <div className="flex flex-col items-center">
+              {content.content_url && (
+                <iframe
+                  width="560"
+                  height="315"
+                  className="w-full max-w-md mx-auto"
+                  src={content.content_url}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                ></iframe>
+              )}
+              <CardDescription className="text-gray-700 mt-2 text-center">
+                {content.content_text}
+              </CardDescription>
+            </div>
+          )}
+          {content.content_type === "audio" && (
+            <div>
+              <audio controls className="w-full">
+                <source src={content.content_url} type="audio/mpeg" />
+                Your browser does not support the audio element.
+              </audio>
+              <CardDescription className="text-gray-700 mt-2 text-center">
+                {content.content_text}
+              </CardDescription>
+            </div>
+          )}
+          {content.content_type === "text" && (
+            <CardDescription className="text-gray-700 text-lg">
+              {content.content_text}
+            </CardDescription>
+          )}
+          {content.content_type === "picture" && (
+            <div>
+              <img src={content.content_url} alt="content" className="w-full" />
+              <CardDescription className="text-gray-700 mt-2 text-center">
+                {content.content_text}
+              </CardDescription>
+            </div>
+          )}
+          {isSelected && (
+            <>
+              <Label className="block text-gray-700 mt-4">Content Text</Label>
+              <Textarea
+                value={editedContent.content_text}
+                onChange={(e) =>
+                  setEditedContent({
+                    ...editedContent,
+                    content_text: e.target.value,
+                  })
+                }
+                className="w-full mt-2 p-2 border border-gray-300 rounded-md"
+              />
+              {["video", "audio", "picture"].includes(content.content_type) && (
+                <>
+                  <Label className="block text-gray-700 mt-4">
+                    Content URL
+                  </Label>
+                  <Input
+                    value={editedContent.content_url}
+                    onChange={(e) =>
+                      setEditedContent({
+                        ...editedContent,
+                        content_url: e.target.value,
+                      })
+                    }
+                    className="w-full mt-2 p-2 border border-gray-300 rounded-md"
+                  />
+                </>
+              )}
+              <div className="flex space-x-2 mt-4">
+                <Button
+                  onClick={onBack}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                >
+                  Save
+                </Button>
+                <Button
+                  onClick={() => onDelete(content.content_id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                >
+                  Delete
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const CreateContentDialog = ({ isOpen, onClose, onCreateContent }) => {
+  const [newContent, setNewContent] = useState({
+    content_type: "",
+    content_url: "",
+    content_text: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewContent({ ...newContent, [name]: value });
+  };
+
+  const handleCreate = () => {
+    onCreateContent(newContent);
+    setNewContent({ content_type: "", content_url: "", content_text: "" });
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create New Content</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="content_type">Content Type</Label>
+            <select
+              id="content_type"
+              name="content_type"
+              value={newContent.content_type}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Select a type</option>
+              <option value="text">Text</option>
+              <option value="video">Video</option>
+              <option value="audio">Audio</option>
+              <option value="picture">Picture</option>
+            </select>
+          </div>
+          {newContent.content_type !== "text" && (
+            <div>
+              <Label htmlFor="content_url">Content URL</Label>
+              <Input
+                id="content_url"
+                name="content_url"
+                value={newContent.content_url}
+                onChange={handleInputChange}
+                className="w-full mt-1"
+              />
+            </div>
+          )}
+          <div>
+            <Label htmlFor="content_text">Content Text</Label>
+            <Textarea
+              id="content_text"
+              name="content_text"
+              value={newContent.content_text}
+              onChange={handleInputChange}
+              className="w-full mt-1"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreate}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            Create Content
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ContentManagement = ({ lesson, onBack }) => {
+  const [contents, setContents] = useState([]);
+  const [selectedContent, setSelectedContent] = useState(null);
+  const [isCreateContentDialogOpen, setIsCreateContentDialogOpen] =
+    useState(false);
+
+  useEffect(() => {
+    fetchContents();
+  }, [lesson.lesson_id]);
+
+  const fetchContents = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lesson/contents?lessonId=${lesson.lesson_id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch contents");
+      }
+
+      const contentsData = await response.json();
+      setContents(contentsData);
+    } catch (error) {
+      console.error("Error fetching contents:", error);
+    }
+  };
+
+  const handleCreateContent = async (newContent) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lesson/content/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            lesson_id: lesson.lesson_id,
+            ...newContent,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create content");
+      }
+
+      await fetchContents();
+    } catch (error) {
+      console.error("Error creating content:", error);
+    }
+  };
+
+  const handleSaveContent = async (editedContent) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lesson/content/update`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(editedContent),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update content");
+      }
+
+      await fetchContents();
+      setSelectedContent(null);
+    } catch (error) {
+      console.error("Error updating content:", error);
+    }
+  };
+
+  const handleDeleteContent = async (contentId) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/instructor/course/lesson/content/delete`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            content_id: contentId,
+            lesson_id: lesson.lesson_id,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete content");
+      }
+
+      await fetchContents();
+      setSelectedContent(null);
+    } catch (error) {
+      console.error("Error deleting content:", error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Button onClick={onBack} variant="ghost">
+        <ChevronLeft className="mr-2 h-4 w-4" /> Back to Lesson
+      </Button>
+      <h2 className="text-3xl font-bold">
+        Manage Content for {lesson.lesson_title}
+      </h2>
+      <ScrollArea className="h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 gap-4">
+          {contents.map((content) => (
+            <ContentCard
+              key={content.content_id}
+              content={content}
+              isSelected={
+                selectedContent &&
+                selectedContent.content_id === content.content_id
+              }
+              onClick={() => setSelectedContent(content)}
+              onSave={handleSaveContent}
+              onDelete={handleDeleteContent}
+              onBack={() => setSelectedContent(null)}
+            />
+          ))}
+          <Card className="w-full flex justify-center items-center bg-white shadow-md rounded-lg overflow-hidden">
+            <CardContent className="p-4">
+              <Button
+                onClick={() => setIsCreateContentDialogOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Content
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </ScrollArea>
+      <CreateContentDialog
+        isOpen={isCreateContentDialogOpen}
+        onClose={() => setIsCreateContentDialogOpen(false)}
+        onCreateContent={handleCreateContent}
+      />
+    </div>
   );
 };
 
