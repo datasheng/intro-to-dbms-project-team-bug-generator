@@ -18,6 +18,7 @@ import {
   CreditCard,
   CheckCircle,
   Lock,
+  ChevronRight,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -248,6 +249,14 @@ const CourseDetails = ({
                     <AccordionTrigger>{`Lesson ${lesson.lesson_number}: ${lesson.lesson_title}`}</AccordionTrigger>
                     <AccordionContent>
                       <p>{lesson.lesson_description}</p>
+                      <Button
+                        className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
+                        onClick={() => {
+                          console.log(`Opening lesson ${lesson.lesson_number}`);
+                        }}
+                      >
+                        Open Lesson <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
