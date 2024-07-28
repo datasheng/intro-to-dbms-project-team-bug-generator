@@ -79,6 +79,28 @@ const Metrics = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/admin/metrics/export`);
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = "platform_metrics_export.csv";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        throw new Error("Failed to download CSV");
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <AdminKeyDialog
@@ -95,8 +117,7 @@ const Metrics = () => {
       </h1>
 
       <Button
-        as="a"
-        href={`${API_URL}/api/admin/metrics/export`}
+        onClick={handleExportCSV}
         className="bg-indigo-600 hover:bg-indigo-700 text-white"
       >
         <FileSpreadsheet className="mr-2 h-4 w-4" />
