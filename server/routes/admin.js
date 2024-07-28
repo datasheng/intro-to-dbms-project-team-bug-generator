@@ -21,22 +21,23 @@ router.post("/authenticate", (req, res) => {
   }
 });
 
+function formatDate(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${month}/${day}/${year}`;
+}
+
 router.get("/metrics/export", (_req, res) => {
   try {
     db.query(
       `
       SELECT 
-        e.enrollment_date,
-        e.enrollment_id,
-        e.student_id,
-        c.instructor_id,
-        c.course_price
+        *
       FROM 
-        Enrollment e
-      JOIN 
-        Course c ON e.course_id = c.course_id
-      WHERE 
-        c.course_price > 0
+        Sale
       `,
       (err, results) => {
         if (err) {
@@ -48,14 +49,16 @@ router.get("/metrics/export", (_req, res) => {
 
         const salesData = results.map((row) => ({
           ...row,
-          fee_generated: parseFloat((row.course_price * 0.1).toFixed(2)),
+          sale_date: formatDate(row.sale_date),
+          fee_generated: parseFloat((row.sale_price * 0.1).toFixed(2)),
         }));
         const fields = [
-          "enrollment_date",
-          "enrollment_id",
+          "sale_id",
           "student_id",
           "instructor_id",
-          "course_price",
+          "course_id",
+          "sale_date",
+          "sale_price",
           "fee_generated",
         ];
         const json2csvParser = new Parser({ fields });

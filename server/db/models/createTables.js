@@ -64,6 +64,22 @@ const queries = [
             )
         `,
   },
+  {
+    name: "Sale",
+    query: `
+            CREATE TABLE IF NOT EXISTS Sale (
+                sale_id CHAR(36) PRIMARY KEY,
+                student_id CHAR(36),
+                instructor_id CHAR(36),
+                course_id CHAR(36),
+                sale_date INT,
+                sale_price DECIMAL(10, 2),
+                FOREIGN KEY (student_id) REFERENCES User(user_id),
+                FOREIGN KEY (instructor_id) REFERENCES User(user_id),
+                FOREIGN KEY (course_id) REFERENCES Course(course_id)
+            )
+        `,
+  },
 ];
 
 module.exports = queries;

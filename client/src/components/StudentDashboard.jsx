@@ -401,6 +401,33 @@ const StudentDashboard = () => {
     setSearchTerm("");
   };
 
+  const confirmPurchase = async (courseId, salePrice) => {
+    try {
+      const response = await fetch(`${API_URL}/api/student/purchase/confirm`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instructorId: selectedCourse.instructor_id,
+          courseId: courseId,
+          salePrice: salePrice,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to confirm purchase");
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+    } catch (error) {
+      console.error("Error confirming purchase:", error);
+      setError("Error confirming purchase: " + error.message);
+    }
+  };
+
   const handleEnroll = async (courseId) => {
     setIsLoading(true);
     try {
@@ -431,6 +458,10 @@ const StudentDashboard = () => {
         enrollment_status: "active",
         enrollment_date: Math.floor(Date.now() / 1000),
       }));
+
+      if (selectedCourse.course_price > 0) {
+        await confirmPurchase(courseId, selectedCourse.course_price);
+      }
     } catch (error) {
       setError("Error enrolling in course: " + error.message);
     } finally {

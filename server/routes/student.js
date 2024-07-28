@@ -258,4 +258,41 @@ router.get("/student/course/lesson/contents", verifyToken, (req, res) => {
   }
 });
 
+router.post("/student/purchase/confirm", verifyToken, (req, res) => {
+  try {
+    const { instructorId, courseId, salePrice } = req.body;
+
+    if (!instructorId || !courseId || !salePrice) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    const saleDate = Math.floor(Date.now() / 1000);
+
+    db.query(
+      `INSERT INTO Sale (sale_id, student_id, instructor_id, course_id, sale_date, sale_price) 
+         VALUES (UUID(), ?, ?, ?, ?, ?)`,
+      [req.userId, instructorId, courseId, saleDate, salePrice],
+      (err, result) => {
+        if (err) {
+          console.error("Error creating sale:", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+        }
+
+        res.json({
+          success: true,
+          message: "Sale created successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error creating sale:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 module.exports = router;
