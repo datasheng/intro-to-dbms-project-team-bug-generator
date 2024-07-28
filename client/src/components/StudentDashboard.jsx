@@ -214,7 +214,7 @@ const CourseDetails = ({
                   </AlertDialogTitle>
                   <AlertDialogDescription>
                     This action cannot be undone. You may lose access to course
-                    materials and progress.
+                    materials and progress. You will not be refunded amd will have to pay for the course again if you wish to reenroll.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
