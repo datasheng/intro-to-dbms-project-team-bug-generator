@@ -332,7 +332,7 @@ const CourseDetails = ({ course, onBack, onSave }) => {
                       variant="outline"
                       onClick={() => handleEditLesson(lesson)}
                     >
-                      Edit Lesson
+                      Edit Details
                     </Button>
                     <Button variant="outline">Manage Content</Button>
                     <Button

@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/student");
 const instructorRoutes = require("./routes/instructor");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = 3000;
@@ -23,11 +24,12 @@ app.use(
     },
     credentials: true,
   })
-); // can remove this in final build since frontend and backend will be on the same server
+);
 app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/api", studentRoutes);
 app.use("/api", instructorRoutes);
+app.use("/api/admin", adminRoutes);
 
 const createTables = async () => {
   for (const { name, query } of createTableQueries) {

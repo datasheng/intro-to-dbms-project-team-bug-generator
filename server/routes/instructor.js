@@ -24,7 +24,7 @@ router.get("/instructor/courses", verifyToken, (req, res) => {
             c.course_id;
         `,
       [req.userId],
-      async (err, results) => {
+      (err, results) => {
         if (err) {
           console.error("Error querying user courses:", err);
           return res
