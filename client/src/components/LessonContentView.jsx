@@ -21,10 +21,15 @@ const ContentCard = ({ content }) => (
       {content.content_type === "video" && (
         <div className="aspect-w-16 aspect-h-9">
           <iframe
+            width="560"
+            height="315"
+            className="w-full max-w-md mx-auto"
             src={content.content_url}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
-            className="w-full h-full"
           ></iframe>
         </div>
       )}
