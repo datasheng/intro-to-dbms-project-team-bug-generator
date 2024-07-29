@@ -1,4 +1,4 @@
-const procedures = [
+const authProcedures = [
   {
     name: "RegisterUser",
     query: `
@@ -79,4 +79,4 @@ const procedures = [
   },
 ];
 
-module.exports = procedures;
+module.exports = authProcedures;

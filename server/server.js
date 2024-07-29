@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./db/config/db.config");
-const createTableQueries = require("./db/models/createTables");
-const createProcedures = require("./db/models/createProcedures");
+const tablesProcedure = require("./db/models/tableProcedures");
+const authProcedures = require("./db/models/authProcedures");
+const sampleDataProcedure = require("./db/models/demoProcedures");
 const authRoutes = require("./routes/auth");
 const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/student");
@@ -33,30 +34,44 @@ app.use("/api", instructorRoutes);
 app.use("/api/admin", adminRoutes);
 
 const createTables = () => {
-  for (const { name, query } of createTableQueries) {
-    try {
-      db.query(query);
-      console.log(`Table '${name}' created or already exists.`);
-    } catch (err) {
-      console.error(`Error creating table '${name}':`, err.message);
-    }
+  try {
+    db.query(tablesProcedure);
+    console.log("Tables procedure created successfully.");
+
+    db.query("CALL CreateTables()");
+    console.log("Tables created or already exist.");
+  } catch (err) {
+    console.error("Error creating tables:", err.message);
   }
 };
 
-const createStoredProcedures = () => {
-  for (const { name, query } of createProcedures) {
+const createAuthProcedures = () => {
+  for (const { name, query } of authProcedures) {
     try {
       db.query(query);
-      console.log(`Stored procedure '${name}' created or already exists.`);
+      console.log(`Auth procedure '${name}' created or already exists.`);
     } catch (err) {
       console.error(`Error creating stored procedure '${name}':`, err.message);
     }
   }
 };
 
+const addSampleData = async () => {
+  try {
+    db.query(sampleDataProcedure);
+    console.log("AddSampleData stored procedure created successfully.");
+
+    db.query("CALL AddSampleData()");
+    console.log("Sample data added or already exists.");
+  } catch (err) {
+    console.error("Error adding sample data:", err.message);
+  }
+};
+
 const initializeDatabase = async () => {
   createTables();
-  createStoredProcedures();
+  createAuthProcedures();
+  addSampleData();
 };
 
 initializeDatabase();
