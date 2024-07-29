@@ -17,40 +17,31 @@ router.post("/register", async (req, res) => {
   }
 
   try {
+    const hashedPassword = await argon2.hash(password, {
+      type: argon2.argon2id,
+    });
+
     db.query(
-      "SELECT * FROM User WHERE email = ?",
-      [email],
-      async (err, results) => {
+      "CALL RegisterUser(?, ?, ?, @success, @message)",
+      [fullName, email, hashedPassword],
+      (err) => {
         if (err) {
-          console.error("Error querying user:", err);
+          console.error("Error calling RegisterUser procedure:", err);
           return res
             .status(500)
             .send({ success: false, message: "Internal Server Error" });
         }
-
-        if (results.length > 0) {
-          return res
-            .status(400)
-            .send({ success: false, message: "Email already in use" });
-        }
-
-        const hashedPassword = await argon2.hash(password, {
-          type: argon2.argon2id,
-        });
-
         db.query(
-          "INSERT INTO User (user_id, full_name, email, password) VALUES (UUID(), ?, ?, ?)",
-          [fullName, email, hashedPassword],
+          "SELECT @success AS success, @message AS message",
           (err, results) => {
             if (err) {
-              console.error("Error inserting user:", err);
+              console.error("Error retrieving procedure results:", err);
               return res
                 .status(500)
                 .send({ success: false, message: "Internal Server Error" });
             }
-            res
-              .status(201)
-              .send({ success: true, message: "Registration successful" });
+            const { success, message } = results[0];
+            res.status(success ? 201 : 400).send({ success, message });
           }
         );
       }
@@ -71,53 +62,66 @@ router.post("/login", async (req, res) => {
   }
 
   db.query(
-    "SELECT * FROM User WHERE email = ?",
+    "CALL LoginUser(?, @user_id, @full_name, @hashed_password, @success, @message)",
     [email],
-    async (err, results) => {
+    async (err) => {
       if (err) {
-        console.error("Error querying user:", err);
+        console.error("Error calling LoginUser procedure:", err);
         return res
           .status(500)
           .send({ success: false, message: "Internal Server Error" });
       }
-
-      if (results.length === 0) {
-        return res
-          .status(404)
-          .send({ success: false, message: "User not found" });
-      }
-
-      const user = results[0];
-      try {
-        const passwordIsValid = await argon2.verify(user.password, password, {
-          type: argon2.argon2id,
-        });
-
-        if (!passwordIsValid) {
-          return res
-            .status(403)
-            .send({ success: false, message: "Invalid password" });
-        }
-
-        const token = jwt.sign(
-          { id: user.user_id, name: user.full_name },
-          SECRET_KEY,
-          {
-            expiresIn: 86400,
+      db.query(
+        "SELECT @user_id AS user_id, @full_name AS full_name, @hashed_password AS hashed_password, @success AS success, @message AS message",
+        async (err, results) => {
+          if (err) {
+            console.error("Error retrieving procedure results:", err);
+            return res
+              .status(500)
+              .send({ success: false, message: "Internal Server Error" });
           }
-        );
-        res.status(200).send({
-          success: true,
-          message: "Login successful",
-          auth: token,
-          displayName: user.full_name,
-        });
-      } catch (err) {
-        console.error("Error verifying password:", err);
-        res
-          .status(500)
-          .send({ success: false, message: "Internal Server Error" });
-      }
+          const { user_id, full_name, hashed_password, success, message } =
+            results[0];
+          if (!success) {
+            return res.status(404).send({ success, message });
+          }
+
+          try {
+            const passwordIsValid = await argon2.verify(
+              hashed_password,
+              password,
+              {
+                type: argon2.argon2id,
+              }
+            );
+
+            if (!passwordIsValid) {
+              return res
+                .status(403)
+                .send({ success: false, message: "Invalid password" });
+            }
+
+            const token = jwt.sign(
+              { id: user_id, name: full_name },
+              SECRET_KEY,
+              {
+                expiresIn: 86400,
+              }
+            );
+            res.status(200).send({
+              success: true,
+              message: "Login successful",
+              auth: token,
+              displayName: full_name,
+            });
+          } catch (err) {
+            console.error("Error verifying password:", err);
+            res
+              .status(500)
+              .send({ success: false, message: "Internal Server Error" });
+          }
+        }
+      );
     }
   );
 });

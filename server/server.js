@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./db/config/db.config");
 const createTableQueries = require("./db/models/createTables");
+const createProcedures = require("./db/models/createProcedures");
 const authRoutes = require("./routes/auth");
 const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/student");
@@ -31,7 +32,7 @@ app.use("/api", studentRoutes);
 app.use("/api", instructorRoutes);
 app.use("/api/admin", adminRoutes);
 
-const createTables = async () => {
+const createTables = () => {
   for (const { name, query } of createTableQueries) {
     try {
       db.query(query);
@@ -42,7 +43,23 @@ const createTables = async () => {
   }
 };
 
-createTables();
+const createStoredProcedures = () => {
+  for (const { name, query } of createProcedures) {
+    try {
+      db.query(query);
+      console.log(`Stored procedure '${name}' created or already exists.`);
+    } catch (err) {
+      console.error(`Error creating stored procedure '${name}':`, err.message);
+    }
+  }
+};
+
+const initializeDatabase = async () => {
+  createTables();
+  createStoredProcedures();
+};
+
+initializeDatabase();
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
